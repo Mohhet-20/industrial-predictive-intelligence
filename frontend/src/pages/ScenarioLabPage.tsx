@@ -278,8 +278,8 @@ export function ScenarioLabPage() {
         <h3 className="font-semibold text-slate-900">Scope</h3>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="block text-xs font-medium text-slate-500">Asset</label>
-            <select
+            <label htmlFor="scenario-lab-asset" className="block text-xs font-medium text-slate-500">Asset</label>
+            <select id="scenario-lab-asset"
               value={assetId}
               onChange={(e) => { setAssetId(e.target.value); setSensorId(""); setSelectedScenarioId(null); setExtraSensorIds([]); }}
               className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
@@ -289,8 +289,8 @@ export function ScenarioLabPage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500">Primary sensor</label>
-            <select value={sensorId} onChange={(e) => setSensorId(e.target.value)} disabled={!assetId} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-50">
+            <label htmlFor="scenario-lab-primary-sensor" className="block text-xs font-medium text-slate-500">Primary sensor</label>
+            <select id="scenario-lab-primary-sensor" value={sensorId} onChange={(e) => setSensorId(e.target.value)} disabled={!assetId} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-50">
               <option value="">Select a sensor…</option>
               {sensors.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.unit})</option>)}
             </select>
@@ -304,18 +304,18 @@ export function ScenarioLabPage() {
           <h3 className="font-semibold text-slate-900">Create a scenario</h3>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="block text-xs font-medium text-slate-500">Name</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. what if bearing temp shifts +8C" className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+              <label htmlFor="scenario-lab-name" className="block text-xs font-medium text-slate-500">Name</label>
+              <input id="scenario-lab-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. what if bearing temp shifts +8C" className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500">Scenario type</label>
-              <select value={scenarioType} onChange={(e) => setScenarioType(e.target.value as ScenarioType)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
+              <label htmlFor="scenario-lab-scenario-type" className="block text-xs font-medium text-slate-500">Scenario type</label>
+              <select id="scenario-lab-scenario-type" value={scenarioType} onChange={(e) => setScenarioType(e.target.value as ScenarioType)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
                 {(Object.keys(SCENARIO_TYPE_LABELS) as ScenarioType[]).map((t) => <option key={t} value={t}>{SCENARIO_TYPE_LABELS[t]}</option>)}
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-xs font-medium text-slate-500">Description (optional)</label>
-              <input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+              <label htmlFor="scenario-lab-description-optional" className="block text-xs font-medium text-slate-500">Description (optional)</label>
+              <input id="scenario-lab-description-optional" value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
             </div>
           </div>
 
@@ -343,37 +343,37 @@ export function ScenarioLabPage() {
               <p className="mt-4 text-xs font-medium text-slate-500">Modification</p>
               <div className="mt-1 grid grid-cols-1 gap-3 sm:grid-cols-4">
                 <div>
-                  <label className="block text-xs text-slate-400">Starts at</label>
-                  <input type="datetime-local" value={modificationStart} onChange={(e) => setModificationStart(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+                  <label htmlFor="scenario-lab-starts-at" className="block text-xs text-slate-400">Starts at</label>
+                  <input id="scenario-lab-starts-at" type="datetime-local" value={modificationStart} onChange={(e) => setModificationStart(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400">
+                  <label htmlFor="scenario-lab-duration" className="block text-xs text-slate-400">
                     Duration (hours{scenarioType === "temporary_spike" || scenarioType === "missing_data_gap" ? ", required" : ", optional — blank = to end of window"})
                   </label>
-                  <input type="number" min={0} value={durationHours} onChange={(e) => setDurationHours(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+                  <input id="scenario-lab-duration" type="number" min={0} value={durationHours} onChange={(e) => setDurationHours(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400">
+                  <label htmlFor="scenario-lab-magnitude" className="block text-xs text-slate-400">
                     Magnitude {scenarioType === "trend_change" ? "(units/hour)" : scenarioType === "variability_change" ? "(multiplier, e.g. 2 = twice as noisy)" : scenarioType === "missing_data_gap" ? "(fraction 0–1 of in-window points to drop; 1 = full gap)" : "(sensor units)"}
                   </label>
-                  <input type="number" step="any" value={magnitude} onChange={(e) => setMagnitude(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+                  <input id="scenario-lab-magnitude" type="number" step="any" value={magnitude} onChange={(e) => setMagnitude(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400">Unit (optional)</label>
-                  <input value={unit} onChange={(e) => setUnit(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+                  <label htmlFor="scenario-lab-unit-optional" className="block text-xs text-slate-400">Unit (optional)</label>
+                  <input id="scenario-lab-unit-optional" value={unit} onChange={(e) => setUnit(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
                 </div>
               </div>
 
               {scenarioType === "variability_change" && (
                 <div className="mt-3">
-                  <label className="block text-xs text-slate-400">Rolling window (observations, for the median used to rescale deviation)</label>
-                  <input type="number" min={1} value={rollingWindowObs} onChange={(e) => setRollingWindowObs(e.target.value)} className="mt-1 w-40 rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+                  <label htmlFor="scenario-lab-rolling-window-observations-for-the-median-used-to-rescale-deviation" className="block text-xs text-slate-400">Rolling window (observations, for the median used to rescale deviation)</label>
+                  <input id="scenario-lab-rolling-window-observations-for-the-median-used-to-rescale-deviation" type="number" min={1} value={rollingWindowObs} onChange={(e) => setRollingWindowObs(e.target.value)} className="mt-1 w-40 rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
                 </div>
               )}
               {scenarioType === "temporary_spike" && (
                 <div className="mt-3">
-                  <label className="block text-xs text-slate-400">Shape</label>
-                  <select value={spikeShape} onChange={(e) => setSpikeShape(e.target.value as "rectangular" | "triangular")} className="mt-1 w-40 rounded-md border border-slate-300 px-2 py-1.5 text-sm">
+                  <label htmlFor="scenario-lab-shape" className="block text-xs text-slate-400">Shape</label>
+                  <select id="scenario-lab-shape" value={spikeShape} onChange={(e) => setSpikeShape(e.target.value as "rectangular" | "triangular")} className="mt-1 w-40 rounded-md border border-slate-300 px-2 py-1.5 text-sm">
                     <option value="rectangular">Rectangular (full magnitude across window)</option>
                     <option value="triangular">Triangular (ramps up, peaks at midpoint, ramps down)</option>
                   </select>

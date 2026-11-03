@@ -150,8 +150,8 @@ export function TemporalAnalysisPage() {
 
       <div className="grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <label className="block text-xs font-medium text-slate-500">Asset</label>
-          <select
+          <label htmlFor="temporal-analysis-asset" className="block text-xs font-medium text-slate-500">Asset</label>
+          <select id="temporal-analysis-asset"
             value={assetId}
             onChange={(e) => {
               setAssetId(e.target.value);
@@ -169,8 +169,8 @@ export function TemporalAnalysisPage() {
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-500">Sensor</label>
-          <select
+          <label htmlFor="temporal-analysis-sensor" className="block text-xs font-medium text-slate-500">Sensor</label>
+          <select id="temporal-analysis-sensor"
             value={sensorId}
             onChange={(e) => setSensorId(e.target.value)}
             disabled={!assetId}
@@ -185,8 +185,8 @@ export function TemporalAnalysisPage() {
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-500">Start</label>
-          <input
+          <label htmlFor="temporal-analysis-start" className="block text-xs font-medium text-slate-500">Start</label>
+          <input id="temporal-analysis-start"
             type="datetime-local"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
@@ -194,8 +194,8 @@ export function TemporalAnalysisPage() {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-500">End</label>
-          <input
+          <label htmlFor="temporal-analysis-end" className="block text-xs font-medium text-slate-500">End</label>
+          <input id="temporal-analysis-end"
             type="datetime-local"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
@@ -359,8 +359,8 @@ export function TemporalAnalysisPage() {
             </p>
             <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-4">
               <div>
-                <label className="block text-xs font-medium text-slate-500">Kind</label>
-                <select
+                <label htmlFor="temporal-analysis-kind" className="block text-xs font-medium text-slate-500">Kind</label>
+                <select id="temporal-analysis-kind"
                   value={featureKind}
                   onChange={(e) => setFeatureKind(e.target.value as FeatureKind)}
                   className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
@@ -374,8 +374,8 @@ export function TemporalAnalysisPage() {
               </div>
               {WINDOWED_FEATURE_KINDS.includes(featureKind) && (
                 <div>
-                  <label className="block text-xs font-medium text-slate-500">Window (minutes)</label>
-                  <input
+                  <label htmlFor="temporal-analysis-window-minutes" className="block text-xs font-medium text-slate-500">Window (minutes)</label>
+                  <input id="temporal-analysis-window-minutes"
                     type="number"
                     min={1}
                     value={featureWindowMinutes}
@@ -385,8 +385,8 @@ export function TemporalAnalysisPage() {
                 </div>
               )}
               <div>
-                <label className="block text-xs font-medium text-slate-500">As of</label>
-                <input
+                <label htmlFor="temporal-analysis-as-of" className="block text-xs font-medium text-slate-500">As of</label>
+                <input id="temporal-analysis-as-of"
                   type="datetime-local"
                   value={featureAsOf}
                   onChange={(e) => setFeatureAsOf(e.target.value)}
@@ -434,8 +434,8 @@ export function TemporalAnalysisPage() {
               Compares this sensor to another on the same asset over the selected range. Association only — never causation.
             </p>
             <div className="mt-3 max-w-xs">
-              <label className="block text-xs font-medium text-slate-500">Compare against</label>
-              <select
+              <label htmlFor="temporal-analysis-compare-against" className="block text-xs font-medium text-slate-500">Compare against</label>
+              <select id="temporal-analysis-compare-against"
                 value={compareSensorId}
                 onChange={(e) => setCompareSensorId(e.target.value)}
                 className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"

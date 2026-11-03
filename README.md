@@ -31,6 +31,16 @@ version of why that discipline mattered more than feature count.
 
 ---
 
+![Anomaly intelligence: a robust z-score detector trained on stored history flags a candidate anomaly](./docs/screenshots/03-anomaly-intelligence.png)
+
+| | |
+|---|---|
+| ![Overview](./docs/screenshots/01-overview.png) Overview: what's in the system, nothing projected | ![Investigation workspace](./docs/screenshots/02-investigation-workspace.png) Investigation workspace with a transparent triage ordering |
+| ![Condition intelligence](./docs/screenshots/04-condition-forecasting.png) Condition intelligence and backtest-gated forecasting | ![Scenario lab](./docs/screenshots/05-scenario-lab.png) Scenario lab: non-destructive what-if runs |
+| ![MLOps governance](./docs/screenshots/06-mlops-governance.png) MLOps lifecycle and governance | ![Data quality](./docs/screenshots/07-data-quality.png) Data quality findings from ingestion |
+
+Screenshots are from a fresh database: the synthetic seed plus the investigation and scenario acceptance scripts.
+
 ## The problem this addresses
 
 Industrial monitoring software is easy to make *look* intelligent —

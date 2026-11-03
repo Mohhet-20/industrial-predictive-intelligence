@@ -48,8 +48,8 @@ export function DataQualityPage() {
 
       <div className="flex gap-4 rounded-xl border border-slate-200 bg-white p-4">
         <div>
-          <label className="block text-xs font-medium text-slate-500">Asset</label>
-          <select value={assetId} onChange={(e) => setAssetId(e.target.value)} className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm">
+          <label htmlFor="data-quality-asset" className="block text-xs font-medium text-slate-500">Asset</label>
+          <select id="data-quality-asset" value={assetId} onChange={(e) => setAssetId(e.target.value)} className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm">
             <option value="">All assets</option>
             {(assetsQuery.data?.items ?? []).map((a) => (
               <option key={a.id} value={a.id}>
@@ -59,8 +59,8 @@ export function DataQualityPage() {
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-500">Severity</label>
-          <select
+          <label htmlFor="data-quality-severity" className="block text-xs font-medium text-slate-500">Severity</label>
+          <select id="data-quality-severity"
             value={severity}
             onChange={(e) => setSeverity(e.target.value as DataQualityIssueSeverity | "")}
             className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"

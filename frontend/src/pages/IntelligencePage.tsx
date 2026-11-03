@@ -259,20 +259,20 @@ export function IntelligencePage() {
         {showTrainForm && (
           <div className="mt-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 sm:grid-cols-3">
             <div>
-              <label className="block text-xs font-medium text-slate-500">Name</label>
-              <input value={trainName} onChange={(e) => setTrainName(e.target.value)} placeholder="e.g. pump-01-temp-baseline" className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+              <label htmlFor="intelligence-name" className="block text-xs font-medium text-slate-500">Name</label>
+              <input id="intelligence-name" value={trainName} onChange={(e) => setTrainName(e.target.value)} placeholder="e.g. pump-01-temp-baseline" className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500">Method</label>
-              <select value={trainType} onChange={(e) => setTrainType(e.target.value as DetectorType)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
+              <label htmlFor="intelligence-method" className="block text-xs font-medium text-slate-500">Method</label>
+              <select id="intelligence-method" value={trainType} onChange={(e) => setTrainType(e.target.value as DetectorType)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
                 <option value="robust_zscore">Robust z-score (single sensor)</option>
                 <option value="isolation_forest">Isolation Forest (multivariate)</option>
                 <option value="mahalanobis">Mahalanobis distance (sensor relationships, 2-6 sensors)</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500">Asset</label>
-              <select
+              <label htmlFor="intelligence-asset" className="block text-xs font-medium text-slate-500">Asset</label>
+              <select id="intelligence-asset"
                 value={trainAssetId}
                 onChange={(e) => {
                   setTrainAssetId(e.target.value);
@@ -287,10 +287,10 @@ export function IntelligencePage() {
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-xs font-medium text-slate-500">
+              <p id="intelligence-train-sensors" className="block text-xs font-medium text-slate-500">
                 Sensor{trainType === "mahalanobis" ? "s (select 2 to 6)" : trainType === "isolation_forest" ? "s (select one or more)" : " (select exactly one)"}
-              </label>
-              <div className="mt-1 flex flex-wrap gap-2">
+              </p>
+              <div role="group" aria-labelledby="intelligence-train-sensors" className="mt-1 flex flex-wrap gap-2">
                 {(trainSensorsQuery.data?.items ?? []).map((s) => {
                   const checked = trainSensorIds.includes(s.id);
                   return (
@@ -315,17 +315,17 @@ export function IntelligencePage() {
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500">Reference start</label>
-              <input type="datetime-local" value={trainRefStart} onChange={(e) => setTrainRefStart(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+              <label htmlFor="intelligence-reference-start" className="block text-xs font-medium text-slate-500">Reference start</label>
+              <input id="intelligence-reference-start" type="datetime-local" value={trainRefStart} onChange={(e) => setTrainRefStart(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500">Reference end</label>
-              <input type="datetime-local" value={trainRefEnd} onChange={(e) => setTrainRefEnd(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+              <label htmlFor="intelligence-reference-end" className="block text-xs font-medium text-slate-500">Reference end</label>
+              <input id="intelligence-reference-end" type="datetime-local" value={trainRefEnd} onChange={(e) => setTrainRefEnd(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
             </div>
             {isMultiSensorDetector(trainType) && (
               <div>
-                <label className="block text-xs font-medium text-slate-500">Grid step (minutes)</label>
-                <input type="number" min={5} value={trainStepMinutes} onChange={(e) => setTrainStepMinutes(Number(e.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+                <label htmlFor="intelligence-grid-step-minutes" className="block text-xs font-medium text-slate-500">Grid step (minutes)</label>
+                <input id="intelligence-grid-step-minutes" type="number" min={5} value={trainStepMinutes} onChange={(e) => setTrainStepMinutes(Number(e.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
               </div>
             )}
             <div className="flex items-end sm:col-span-3">
@@ -398,12 +398,12 @@ export function IntelligencePage() {
             </p>
             <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-4">
               <div>
-                <label className="block text-xs font-medium text-slate-500">Scoring start</label>
-                <input type="datetime-local" value={runScoringStart} onChange={(e) => setRunScoringStart(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+                <label htmlFor="intelligence-scoring-start" className="block text-xs font-medium text-slate-500">Scoring start</label>
+                <input id="intelligence-scoring-start" type="datetime-local" value={runScoringStart} onChange={(e) => setRunScoringStart(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-500">Scoring end</label>
-                <input type="datetime-local" value={runScoringEnd} onChange={(e) => setRunScoringEnd(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+                <label htmlFor="intelligence-scoring-end" className="block text-xs font-medium text-slate-500">Scoring end</label>
+                <input id="intelligence-scoring-end" type="datetime-local" value={runScoringEnd} onChange={(e) => setRunScoringEnd(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
               </div>
               <div className="flex items-end">
                 <label className="flex items-center gap-1.5 text-xs text-slate-600">
@@ -457,8 +457,8 @@ export function IntelligencePage() {
         <h3 className="font-semibold text-slate-900">Recent unusual behavior</h3>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-4">
           <div>
-            <label className="block text-xs font-medium text-slate-500">Asset</label>
-            <select
+            <label htmlFor="intelligence-asset-2" className="block text-xs font-medium text-slate-500">Asset</label>
+            <select id="intelligence-asset-2"
               value={filterAssetId}
               onChange={(e) => {
                 setFilterAssetId(e.target.value);
@@ -473,8 +473,8 @@ export function IntelligencePage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500">Sensor</label>
-            <select value={filterSensorId} onChange={(e) => setFilterSensorId(e.target.value)} disabled={!filterAssetId} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-50">
+            <label htmlFor="intelligence-sensor" className="block text-xs font-medium text-slate-500">Sensor</label>
+            <select id="intelligence-sensor" value={filterSensorId} onChange={(e) => setFilterSensorId(e.target.value)} disabled={!filterAssetId} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-50">
               <option value="">All sensors</option>
               {(filterSensorsQuery.data?.items ?? []).map((s) => (
                 <option key={s.id} value={s.id}>{s.name}</option>
@@ -482,8 +482,8 @@ export function IntelligencePage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500">Status</label>
-            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as AnomalyStatus | "")} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
+            <label htmlFor="intelligence-status" className="block text-xs font-medium text-slate-500">Status</label>
+            <select id="intelligence-status" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as AnomalyStatus | "")} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
               <option value="">All statuses</option>
               {(["detected", "under_review", "acknowledged", "resolved", "false_positive"] as AnomalyStatus[]).map((s) => (
                 <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
@@ -491,8 +491,8 @@ export function IntelligencePage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500">Severity</label>
-            <select value={filterSeverity} onChange={(e) => setFilterSeverity(e.target.value as AnomalySeverityTier | "")} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
+            <label htmlFor="intelligence-severity" className="block text-xs font-medium text-slate-500">Severity</label>
+            <select id="intelligence-severity" value={filterSeverity} onChange={(e) => setFilterSeverity(e.target.value as AnomalySeverityTier | "")} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
               <option value="">All tiers</option>
               <option value="observed_unusual_behavior">Observed unusual</option>
               <option value="candidate_anomaly">Candidate anomaly</option>

@@ -255,15 +255,15 @@ export function ConditionPage() {
         <h3 className="font-semibold text-slate-900">Analyze a sensor</h3>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
-            <label className="block text-xs font-medium text-slate-500">Asset</label>
-            <select value={runAssetId} onChange={(e) => { setRunAssetId(e.target.value); setRunSensorId(""); }} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
+            <label htmlFor="condition-asset" className="block text-xs font-medium text-slate-500">Asset</label>
+            <select id="condition-asset" value={runAssetId} onChange={(e) => { setRunAssetId(e.target.value); setRunSensorId(""); }} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
               <option value="">Select an asset…</option>
               {(assetsQuery.data?.items ?? []).map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500">Sensor</label>
-            <select value={runSensorId} onChange={(e) => setRunSensorId(e.target.value)} disabled={!runAssetId} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-50">
+            <label htmlFor="condition-sensor" className="block text-xs font-medium text-slate-500">Sensor</label>
+            <select id="condition-sensor" value={runSensorId} onChange={(e) => setRunSensorId(e.target.value)} disabled={!runAssetId} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-50">
               <option value="">Select a sensor…</option>
               {(sensorsQuery.data?.items ?? []).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
@@ -305,8 +305,8 @@ export function ConditionPage() {
         <h3 className="font-semibold text-slate-900">Degradation signals</h3>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="block text-xs font-medium text-slate-500">Stage</label>
-            <select value={filterStage} onChange={(e) => setFilterStage(e.target.value as DegradationStage | "")} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
+            <label htmlFor="condition-stage" className="block text-xs font-medium text-slate-500">Stage</label>
+            <select id="condition-stage" value={filterStage} onChange={(e) => setFilterStage(e.target.value as DegradationStage | "")} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
               <option value="">All stages</option>
               <option value="observed_trend">Observed trend</option>
               <option value="degradation_candidate">Degradation candidate</option>
@@ -314,8 +314,8 @@ export function ConditionPage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500">Status</label>
-            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as ConditionSignalStatus | "")} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
+            <label htmlFor="condition-status" className="block text-xs font-medium text-slate-500">Status</label>
+            <select id="condition-status" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as ConditionSignalStatus | "")} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm">
               <option value="">All statuses</option>
               {(["detected", "under_review", "acknowledged", "resolved", "false_positive"] as ConditionSignalStatus[]).map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
             </select>
@@ -450,20 +450,20 @@ export function ConditionPage() {
               <p className="text-xs text-slate-500">Uses the asset/sensor selected in &ldquo;Analyze a sensor&rdquo; above ({runSensorId ? "sensor selected" : "select a sensor above first"}).</p>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500">Name</label>
-              <input value={forecastName} onChange={(e) => setForecastName(e.target.value)} placeholder="e.g. bearing-temp-forecast" className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+              <label htmlFor="condition-name" className="block text-xs font-medium text-slate-500">Name</label>
+              <input id="condition-name" value={forecastName} onChange={(e) => setForecastName(e.target.value)} placeholder="e.g. bearing-temp-forecast" className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500">Fit start</label>
-              <input type="datetime-local" value={fitStart} onChange={(e) => setFitStart(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+              <label htmlFor="condition-fit-start" className="block text-xs font-medium text-slate-500">Fit start</label>
+              <input id="condition-fit-start" type="datetime-local" value={fitStart} onChange={(e) => setFitStart(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500">Fit end (backtest cutoff)</label>
-              <input type="datetime-local" value={fitEnd} onChange={(e) => setFitEnd(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+              <label htmlFor="condition-fit-end-backtest-cutoff" className="block text-xs font-medium text-slate-500">Fit end (backtest cutoff)</label>
+              <input id="condition-fit-end-backtest-cutoff" type="datetime-local" value={fitEnd} onChange={(e) => setFitEnd(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500">Test end (held-out through)</label>
-              <input type="datetime-local" value={testEnd} onChange={(e) => setTestEnd(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+              <label htmlFor="condition-test-end-held-out-through" className="block text-xs font-medium text-slate-500">Test end (held-out through)</label>
+              <input id="condition-test-end-held-out-through" type="datetime-local" value={testEnd} onChange={(e) => setTestEnd(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
             </div>
             <div className="flex items-end">
               <button onClick={() => fitForecastMutation.mutate()} disabled={fitForecastMutation.isPending || !runSensorId || !forecastName} className="rounded-md bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50">
@@ -514,12 +514,12 @@ export function ConditionPage() {
             )}
             <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div>
-                <label className="block text-xs font-medium text-slate-500">Horizon (hours)</label>
-                <input type="number" min={1} value={horizonHours} onChange={(e) => setHorizonHours(Number(e.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+                <label htmlFor="condition-horizon-hours" className="block text-xs font-medium text-slate-500">Horizon (hours)</label>
+                <input id="condition-horizon-hours" type="number" min={1} value={horizonHours} onChange={(e) => setHorizonHours(Number(e.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-500">Step (minutes)</label>
-                <input type="number" min={1} value={stepMinutes} onChange={(e) => setStepMinutes(Number(e.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+                <label htmlFor="condition-step-minutes" className="block text-xs font-medium text-slate-500">Step (minutes)</label>
+                <input id="condition-step-minutes" type="number" min={1} value={stepMinutes} onChange={(e) => setStepMinutes(Number(e.target.value))} className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
               </div>
               <div className="flex items-end">
                 <button onClick={() => forecastRunMutation.mutate()} disabled={forecastRunMutation.isPending} className="rounded-md bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50">

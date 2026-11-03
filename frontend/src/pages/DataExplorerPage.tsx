@@ -103,8 +103,8 @@ export function DataExplorerPage() {
 
       <div className="grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <label className="block text-xs font-medium text-slate-500">Asset</label>
-          <select
+          <label htmlFor="data-explorer-asset" className="block text-xs font-medium text-slate-500">Asset</label>
+          <select id="data-explorer-asset"
             value={assetId}
             onChange={(e) => {
               setAssetId(e.target.value);
@@ -121,8 +121,8 @@ export function DataExplorerPage() {
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-500">Start</label>
-          <input
+          <label htmlFor="data-explorer-start" className="block text-xs font-medium text-slate-500">Start</label>
+          <input id="data-explorer-start"
             type="datetime-local"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
@@ -130,8 +130,8 @@ export function DataExplorerPage() {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-500">End</label>
-          <input
+          <label htmlFor="data-explorer-end" className="block text-xs font-medium text-slate-500">End</label>
+          <input id="data-explorer-end"
             type="datetime-local"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
@@ -139,8 +139,8 @@ export function DataExplorerPage() {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-500">Sensors</label>
-          <div className="mt-1 max-h-24 space-y-1 overflow-y-auto rounded-md border border-slate-200 p-2">
+          <p id="data-explorer-sensors" className="block text-xs font-medium text-slate-500">Sensors</p>
+          <div role="group" aria-labelledby="data-explorer-sensors" className="mt-1 max-h-24 space-y-1 overflow-y-auto rounded-md border border-slate-200 p-2">
             {sensors.length === 0 && <p className="text-xs text-slate-400">Select an asset first</p>}
             {sensors.map((s) => (
               <label key={s.id} className="flex items-center gap-2 text-xs text-slate-700">
