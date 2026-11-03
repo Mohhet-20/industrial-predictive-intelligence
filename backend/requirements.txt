@@ -1,0 +1,24 @@
+fastapi==0.143.5
+uvicorn[standard]==0.54.0
+sqlalchemy==2.0.36
+alembic==1.14.0
+pydantic==2.10.3
+pydantic-settings==2.7.0
+PyJWT==2.15.1
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+python-multipart==0.0.32
+email-validator==2.2.0
+python-dateutil==2.9.0.post0
+numpy==2.2.0
+pandas==2.2.3
+scipy==1.14.1
+scikit-learn==1.5.2
+
+# httpx was originally a test-only dependency (FastAPI's TestClient needs
+# it); Phase 9's optional copilot also uses it for the real Anthropic API
+# call, so it's now a real (if optional-feature) runtime dependency too.
+httpx==0.28.1
+
+# testing
+pytest==9.1.1

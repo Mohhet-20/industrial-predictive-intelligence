@@ -1,0 +1,51 @@
+# A deployment-like local environment — NOT a claim of a supported cloud
+# deployment (no such claim is made anywhere in this project; see
+# docs/RELIABILITY_AND_OPERATIONS.md §1). This is the "DEPLOYMENT
+# PRODUCTION-LIKE" tier described there: containers, no live-reload, no
+# bind-mounted source, migrations applied on start, config coming from
+# real environment variables instead of defaults — as close as this
+# single-machine setup gets to how it would actually run in production,
+# distinct from `uvicorn --reload` local dev and from the SQLite
+# in-memory test suite.
+#
+# Requires a .env file next to this one (see .env.example at the repo
+# root) — docker compose loads it automatically. JWT_SECRET_KEY has no
+# default here on purpose: compose fails fast with a clear error if it's
+# missing, the same "no unsafe defaults" principle app/core/config.py
+# enforces inside the app itself.
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: production
+      DATABASE_URL: sqlite:////app/data/pred_platform.db
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in a .env file next to docker-compose.yml — see .env.example}
+      JWT_ALGORITHM: HS256
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - backend_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health/ready"]
+      interval: 15s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  backend_data:

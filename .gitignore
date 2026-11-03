@@ -1,0 +1,41 @@
+# Python
+backend/.venv/
+backend/__pycache__/
+**/__pycache__/
+*.pyc
+backend/data/*.db
+backend/data/*.db-wal
+backend/data/*.db-shm
+!backend/data/.gitkeep
+backend/.env
+backend/.pytest_cache/
+# Phase 7 cleanup: earlier ad-hoc validation runs (live_validate_*.py-style
+# scripts, `alembic check` dry runs against a scratch DB) sometimes point
+# DATABASE_URL at a throwaway *.db file created directly under backend/
+# instead of backend/data/ — the pattern above only covers the latter.
+# Cover any SQLite file anywhere under backend/ so a future one-off script
+# can't leave stray multi-megabyte -wal files sitting in the repo again.
+backend/*.db
+backend/*.db-wal
+backend/*.db-shm
+
+# Docker Compose (root .env — see .env.example)
+/.env
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+# Phase 7 fix: tsconfig.node.json used to emit vite.config.js + two
+# .tsbuildinfo files straight into frontend/ on every build (see that
+# file's own comment) — now routed here instead.
+frontend/.ts-build-cache/
+*.tsbuildinfo
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log

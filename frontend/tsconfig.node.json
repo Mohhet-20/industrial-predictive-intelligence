@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    // Phase 7 fix: a composite project referenced by another project
+    // (tsconfig.json references this one, for `tsc -b`'s cross-project
+    // build) cannot set `noEmit: true` — TS rejects that combination
+    // outright (a referenced project must be able to emit so the
+    // referencing build can link against it). Without an explicit outDir,
+    // the previous config emitted `vite.config.js` and two `.tsbuildinfo`
+    // files directly into the frontend/ root on every single `npm run
+    // build` and `npm run typecheck` — a real, silent side effect nobody
+    // had reason to notice (nothing failed; the stray files just
+    // accumulated next to source, and .gitignore never excluded them).
+    // Routing emit to a dedicated, gitignored directory keeps `tsc -b`'s
+    // real cross-project type-checking behavior while keeping the source
+    // tree clean.
+    "outDir": ".ts-build-cache",
+    "tsBuildInfoFile": ".ts-build-cache/tsconfig.node.tsbuildinfo"
+  },
+  "include": ["vite.config.ts"]
+}

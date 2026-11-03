@@ -1,0 +1,388 @@
+{
+  "run_started_at": "2026-11-03T15:42:51.397414+00:00",
+  "run_finished_at": "2026-11-03T15:42:56.029685+00:00",
+  "provenance": {
+    "seed": 42,
+    "note": "Pure modules (robustness, dq_impact, explainability) are byte-identical across machines and runs given this fixed seed. DB-backed modules (prioritization, copilot_eval, adversarial) run against a freshly-created, uniquely-named organization each run \u2014 their outcomes should be stable, but their raw ids/timestamps are not, by design."
+  },
+  "sections": {
+    "anomaly_detection_robustness": {
+      "component": "anomaly_detection_core",
+      "evaluability": "FULLY EVALUABLE WITH AVAILABLE DATA",
+      "note": "All scenarios run against real app.anomaly.* code with deterministic synthetic inputs \u2014 no DB required.",
+      "scenarios": [
+        {
+          "scenario": "missing_data_gap",
+          "description": "20 consecutive missing observations (a 100-minute gap) in an otherwise clean scoring series.",
+          "points_before_gap_removed": 100,
+          "points_after_gap_removed": 80,
+          "detector_crashed": false,
+          "candidates_found": 0,
+          "finding": "The detector does not crash on a gap and produces no fabricated candidate spanning the missing observations \u2014 it simply has no points to score there. Detection quality during a gap is bounded by data-quality checks (app.services.quality_service's data_gap issue type), not by the anomaly detector, which is the correct division of responsibility."
+        },
+        {
+          "scenario": "noise_sensitivity_sweep",
+          "description": "A fixed +15.0 unit spike injected at reference noise levels [0.5, 1.0, 2.0, 4.0, 8.0]. As reference noise grows, the same absolute spike becomes a smaller number of robust standard deviations, so recall should degrade at high noise \u2014 this is the expected, honest behavior of a z-score-based method, not a bug.",
+          "sweep": [
+            {
+              "reference_noise_std": 0.5,
+              "injected_spike_magnitude": 15.0,
+              "spike_recalled": true,
+              "total_candidates": 1,
+              "spurious_candidates": 0,
+              "baseline_robust_std_estimate": 0.4440171888582268
+            },
+            {
+              "reference_noise_std": 1.0,
+              "injected_spike_magnitude": 15.0,
+              "spike_recalled": true,
+              "total_candidates": 1,
+              "spurious_candidates": 0,
+              "baseline_robust_std_estimate": 0.8880343777164482
+            },
+            {
+              "reference_noise_std": 2.0,
+              "injected_spike_magnitude": 15.0,
+              "spike_recalled": true,
+              "total_candidates": 1,
+              "spurious_candidates": 0,
+              "baseline_robust_std_estimate": 1.7760687554328964
+            },
+            {
+              "reference_noise_std": 4.0,
+              "injected_spike_magnitude": 15.0,
+              "spike_recalled": true,
+              "total_candidates": 1,
+              "spurious_candidates": 0,
+              "baseline_robust_std_estimate": 3.552137510865793
+            },
+            {
+              "reference_noise_std": 8.0,
+              "injected_spike_magnitude": 15.0,
+              "spike_recalled": false,
+              "total_candidates": 0,
+              "spurious_candidates": 0,
+              "baseline_robust_std_estimate": 7.104275021731586
+            }
+          ],
+          "finding": "Spike recalled at noise std <= 4.0; beyond that the injected signal is no longer a statistical outlier relative to reference variability, so it is correctly not flagged rather than incorrectly flagged. This demonstrates the method's actual sensitivity boundary rather than assuming it."
+        },
+        {
+          "scenario": "outlier_robustness_reference",
+          "description": "3 extreme outliers (value=500.0 against a ~N(50,1) series) injected directly into the reference window.",
+          "true_underlying_center": 50.0,
+          "robust_median": 49.95465578143916,
+          "robust_std_estimate": 0.9088524802962095,
+          "naive_mean": 56.71249303288814,
+          "naive_std": 54.847535638883436,
+          "median_error_from_truth": 0.045344218560842364,
+          "mean_error_from_truth": 6.7124930328881405,
+          "finding": "With 3/200 reference points contaminated by extreme outliers, the robust median stayed within 0.045 of the true center (50.0), while a naive mean would have been off by 6.712 \u2014 60.3x wider spread than the robust estimate. This is a measured demonstration of the documented rationale for median/MAD, not an assumption."
+        },
+        {
+          "scenario": "sensor_drift",
+          "description": "A continuous 0.05 unit/5-min linear drift spanning both reference and scoring windows.",
+          "total_drift_over_scoring_window": 5.0,
+          "candidates_flagged": 0,
+          "points_scored": 100,
+          "finding": "This platform's anomaly detectors use a STATIC reference-period baseline (by design \u2014 see docs/ANOMALY_DETECTION.md \u00a72) and are not drift-adaptive. Slow, continuous drift is not yet flagged at this drift rate/duration rather than being tracked as a moving 'new normal.' This is a genuine, stated limitation: an operator relying on this detector for a sensor with known continuous drift (e.g. recalibration-due sensors) should expect eventual flags that reflect drift, not necessarily a fault, and should re-baseline periodically. It is recorded here rather than hidden."
+        },
+        {
+          "scenario": "short_history_boundary",
+          "description": "Reference sample counts swept across the MIN_FOR_BASELINE boundary (30).",
+          "sweep": [
+            {
+              "n": 5,
+              "outcome": "honest_error",
+              "message": "Reference period has only 5 observation(s); at least 30 are required to establish a reliable baseline."
+            },
+            {
+              "n": 29,
+              "outcome": "honest_error",
+              "message": "Reference period has only 29 observation(s); at least 30 are required to establish a reliable baseline."
+            },
+            {
+              "n": 30,
+              "outcome": "baseline_computed"
+            },
+            {
+              "n": 31,
+              "outcome": "baseline_computed"
+            },
+            {
+              "n": 100,
+              "outcome": "baseline_computed"
+            }
+          ],
+          "finding": "The boundary is exact: n=29 raises InsufficientReferenceDataError (an honest, typed error the API surfaces as a real 4xx, not a silently wrong baseline), n=30 and above computes normally. No off-by-one gap between the documented minimum and actual behavior."
+        },
+        {
+          "scenario": "sparse_observations",
+          "description": "30 observations at 5-minute spacing (2.5 hours total) vs. the same 30 values at 1-day spacing (30 days total).",
+          "dense_window_hours": 2.4166666666666665,
+          "sparse_window_hours": 696.0,
+          "dense_median": 50.09693555036425,
+          "sparse_median": 50.09693555036425,
+          "identical_statistics": true,
+          "finding": "Baseline statistics are identical regardless of time-density because compute_baseline is purely value-based (it has no concept of elapsed time once observations are selected). This means a sparse-but-30-day reference window is treated exactly as confidently as a dense 2.5-hour one \u2014 a real, stated limitation: MIN_FOR_BASELINE guards against too FEW points, not against a reference period that is representative in TIME (e.g. missing a season). Operators choosing reference windows should ensure they span representative operating conditions, not just an observation count; this is not enforced in code."
+        },
+        {
+          "scenario": "boundary_threshold",
+          "description": "A value at exactly z=3.5 vs. a value at z=3.49, against threshold=3.5.",
+          "at_exact_threshold_flagged": true,
+          "just_below_threshold_flagged": false,
+          "finding": "The documented `>=` (inclusive) semantics hold exactly: a value at precisely the threshold z-score is flagged, one just below is not."
+        },
+        {
+          "scenario": "isolation_forest_short_reference",
+          "description": "15 raw observations with a 1-hour feature window \u2014 too few grid points will have a complete feature vector.",
+          "outcome": "honest_error",
+          "message": "Only 3 of 3 reference grid points had every feature computed (need >= 30). Widen the reference period, shrink the feature windows, or reduce the number of required features.",
+          "finding": "Isolation Forest scoring refuses to fit on an insufficient reference feature matrix with a typed, honest error rather than fitting on a handful of rows and returning an overconfident model."
+        }
+      ]
+    },
+    "data_quality_impact": {
+      "component": "data_quality_impact",
+      "evaluability": "SYNTHETICALLY EVALUABLE",
+      "note": "Uses the real detector-running code with synthetic, seeded gap/anomaly patterns \u2014 no real sensor failure data exists to measure this against (see docs/SYNTHETIC_DATA.md).",
+      "analyses": [
+        {
+          "analysis": "gap_adjacent_to_anomaly_impact",
+          "description": "The same seeded point-anomaly pattern (3 injected spikes), scored once cleanly and once with 6 observations (30 minutes) of missing data immediately following each spike.",
+          "detector": "robust_zscore",
+          "clean_recall": 1.0,
+          "gapped_recall": 1.0,
+          "clean_precision": 0.6,
+          "gapped_precision": 0.5,
+          "recall_delta": 0.0,
+          "finding": "A gap immediately following an anomaly does not remove the anomaly's own onset point (the spike itself is still present \u2014 only the RECOVERY period is missing), so recall is unchanged in this scenario. This validates that detection quality here depends on whether the anomalous point itself survives, not merely on whether SOME nearby data is missing \u2014 a distinction worth stating explicitly rather than assuming gaps always degrade detection."
+        },
+        {
+          "analysis": "pure_gap_false_positive_check",
+          "description": "A pure data gap (no injected behavior change) scored by both detector types; any candidate found is a false positive by construction.",
+          "robust_zscore_false_positives": 2,
+          "isolation_forest_false_positives": null,
+          "isolation_forest_skipped_reason": "Only 23 of 24 reference grid points had every feature computed (need >= 30). Widen the reference period, shrink the feature windows, or reduce the number of required features.",
+          "finding": "robust_zscore raised 2 false-positive candidate(s) on a pure data gap with default configuration. isolation_forest could not be evaluated on this scenario: Only 23 of 24 reference grid points had every feature computed (need >= 30). Widen the reference period, shrink the feature windows, or reduce the number of required features.."
+        },
+        {
+          "analysis": "gap_threshold_boundary_sweep",
+          "description": "quality_service.GAP_FACTOR=3.0 applied to expected_interval_seconds=300.0.",
+          "threshold_seconds": 900.0,
+          "sweep": {
+            "just_under_threshold": {
+              "gap_seconds": 899.0,
+              "flagged_as_data_gap": false
+            },
+            "exactly_at_threshold": {
+              "gap_seconds": 900.0,
+              "flagged_as_data_gap": false
+            },
+            "just_over_threshold": {
+              "gap_seconds": 901.0,
+              "flagged_as_data_gap": true
+            }
+          },
+          "finding": "The gap threshold is a strict '>' (exclusive), replicated exactly from app.services.quality_service.scan_gaps_for_sensor: a gap exactly equal to 900s is NOT flagged, one second longer is."
+        }
+      ]
+    },
+    "explainability": {
+      "component": "explainability",
+      "evaluability": "FULLY EVALUABLE WITH AVAILABLE DATA",
+      "note": "Each check runs real detector code on synthetic data and independently recomputes the reported explanation numbers from raw inputs via a separate code path, rather than only reviewing the explanation-generation code itself.",
+      "checks": [
+        {
+          "check": "robust_zscore_explanation_traceability",
+          "outcome": "traceable",
+          "reported_baseline_median": 52.039892850509084,
+          "independently_recomputed_median": 52.039892850509084,
+          "reported_robust_std_estimate": 1.2924795884836318,
+          "independently_recomputed_robust_std": 1.2924795884836318,
+          "reported_z_score": -15.604066511938576,
+          "independently_recomputed_z_score": -15.604066511938576,
+          "finding": "The stored explanation's baseline_median, baseline_robust_std_estimate, and z_score all match an independent from-scratch numpy recomputation from the raw reference/scoring data to within floating-point tolerance."
+        },
+        {
+          "check": "isolation_forest_explanation_traceability",
+          "outcome": "traceable",
+          "contributing_features_checked": 3,
+          "mismatches": [],
+          "ranking_is_sorted_by_abs_z_descending": true,
+          "finding": "All 3 reported contributing_features (mean/reference_mean/z_score) matched an independent recomputation from a separate build_feature_matrix call, and the top-3 ranking was correctly sorted by |z-score| descending."
+        },
+        {
+          "check": "explanation_stability_scenario",
+          "outcome": "stable",
+          "candidate_count": 3,
+          "finding": "Running the same detector on identical data twice produced byte-identical explanation dicts."
+        },
+        {
+          "check": "heuristic_explanation_honesty_check",
+          "outcome": "honest",
+          "candidates_checked": 39,
+          "violations": [],
+          "finding": "No isolation_forest explanation text in this scenario used causal-attribution language ('caused by', 'root cause', etc.) beyond the deviation-ranking it actually computes."
+        }
+      ]
+    },
+    "prioritization": {
+      "component": "prioritization",
+      "evaluability": "FULLY EVALUABLE WITH AVAILABLE DATA",
+      "note": "Runs the real orchestration_service.get_prioritized_signals against real ORM-inserted evidence rows in a test database.",
+      "checks": [
+        {
+          "check": "reproducibility_check",
+          "outcome": "reproducible",
+          "item_count": 2,
+          "finding": "Two calls to get_prioritized_signals against unchanged DB state returned byte-identical results (ordering, scores, and every contributing factor)."
+        },
+        {
+          "check": "strong_anomaly_poor_data_quality",
+          "outcome": "context_only_confirmed",
+          "score": 300,
+          "nearby_data_quality_issue_count": 3,
+          "finding": "A high_priority anomaly with 3 nearby critical data-quality issues scored exactly 300 (severity_rank only) \u2014 poor nearby data quality is surfaced for a human to see, but does NOT change this item's rank. This is a real, worth-stating limitation: a poorly-instrumented sensor's anomaly is not deprioritized OR reweighted for the reader, who must apply that judgment themselves."
+        },
+        {
+          "check": "multiple_weak_signals",
+          "outcome": "strong_signal_still_ranks_higher",
+          "weak_signal_score": 140,
+          "strong_signal_score": 300,
+          "weak_signal_count": 5,
+          "finding": "5 OBSERVED_TREND signals on one sensor each scored 140 (stage_rank=1 x 100 + persistence_count=4 x 10 = 140) versus a single VALIDATED_DEGRADATION signal scoring 300 (stage_rank=3 x 100 = 300). The single strong (validated) signal still outranked the repeated weak ones in this scenario."
+        },
+        {
+          "check": "conflicting_detectors",
+          "outcome": "agreement_bonus_applied_correctly",
+          "robust_zscore_score": 235,
+          "isolation_forest_score": 235,
+          "finding": "Two different detector types flagging the same sensor both received the +25 cross_detector_agreement bonus, correctly reflecting independent-method agreement \u2014 a real, inspectable factor, not a hidden score."
+        },
+        {
+          "check": "no_available_signals",
+          "outcome": "empty_result_handled_safely",
+          "finding": "With zero open anomalies/degradation signals, get_prioritized_signals returned an empty items list with honest zero counts and an intact methodology description \u2014 no crash, no placeholder item."
+        },
+        {
+          "check": "stale_evidence",
+          "outcome": "age_not_scored_confirmed",
+          "stale_anomaly_age_days": 400,
+          "stale_score": 200,
+          "fresh_score": 200,
+          "finding": "An anomaly still open after 400 days scored identically (200) to an equivalent anomaly opened 1 hour ago \u2014 this ranking has NO staleness/age factor once an item is still 'open' status. This is a genuine, worth-documenting limitation: an old, possibly-forgotten open item is not surfaced any differently than a brand-new one by score alone (period_start only breaks exact ties, and does so toward MORE RECENT items, meaning stale evidence can rank even further down on ties)."
+        }
+      ]
+    },
+    "copilot_groundedness": {
+      "component": "copilot_groundedness",
+      "evaluability": "FULLY EVALUABLE WITH AVAILABLE DATA (mechanism-level; a real LLM's own judgment is NOT evaluated \u2014 no API key is configured in this environment, see docs/COPILOT.md)",
+      "note": "Each case exercises the real orchestrator/service/API path. Where a specific model response was needed to trigger a path, a FakeProvider supplied controlled text \u2014 this evaluates the platform's retrieval/grounding/safeguard machinery, not a real model's judgment.",
+      "cases": [
+        {
+          "case": "correct_evidence_retrieval",
+          "outcome": "PASS",
+          "evidence_count": 7,
+          "finding": "An asset-context question retrieved real evidence rooted in the actual asset row (not empty, not fabricated)."
+        },
+        {
+          "case": "correct_source_attribution",
+          "outcome": "PASS",
+          "e1_source_type": "asset",
+          "finding": "The cited ref [E1] in the answer resolves to the real evidence item it claims to (the asset row actually queried), and the answer was not flagged."
+        },
+        {
+          "case": "unsupported_question_handling",
+          "outcome": "PASS",
+          "provider_used": "none",
+          "finding": "An out-of-domain question with no provider configured produced the honest 'not configured, here is the evidence' degradation rather than any fabricated answer."
+        },
+        {
+          "case": "insufficient_evidence_handling",
+          "outcome": "PASS",
+          "evidence_categories_present": [
+            "analytical_result",
+            "interpretation_limitation",
+            "observed_fact"
+          ],
+          "finding": "A brand-new asset with no ingested data/anomalies produced no fabricated model_output (anomaly) evidence, and its data-quality summary honestly reported zero issues rather than being omitted or invented."
+        },
+        {
+          "case": "anomaly_vs_failure_distinction",
+          "outcome": "PASS",
+          "hedged_flagged": false,
+          "overclaiming_flagged": true,
+          "finding": "A properly-hedged anomaly answer passed unflagged while a failure-certainty answer about the identical evidence was correctly flagged \u2014 the safeguard distinguishes anomaly-language from failure-language."
+        },
+        {
+          "case": "synthetic_labeling",
+          "outcome": "PASS",
+          "finding": "A real is_synthetic_scenario=True anomaly's copilot evidence text explicitly labels it as a synthetic evaluation scenario, independent of organization naming."
+        },
+        {
+          "case": "authz_boundary",
+          "outcome": "PASS",
+          "status_code": 404,
+          "finding": "A user in a different organization could not retrieve another organization's asset as copilot evidence (404, not leaked data)."
+        },
+        {
+          "case": "provider_unavailable_behavior",
+          "outcome": "PASS",
+          "finding": "With no LLM provider configured, the copilot returned the real retrieved evidence (including the actual asset code) as plain text rather than an error or a fabricated answer."
+        },
+        {
+          "case": "adversarial_question",
+          "outcome": "PASS",
+          "flagged": true,
+          "finding": "An adversarial question paired with a worst-case fabricated-probability response was still caught and flagged by the architectural safeguard (not left to the model's own judgment), and the flagged text was preserved rather than silently rewritten."
+        }
+      ],
+      "summary": "9/9 cases passed"
+    },
+    "adversarial_and_failure_cases": {
+      "component": "adversarial_and_failure_cases",
+      "evaluability": "FULLY EVALUABLE WITH AVAILABLE DATA",
+      "note": "Covers the 9 named Phase 10 \u00a710 scenarios: 4 are new checks below, 1 (synthetic-presented-as-real) is covered by app.evaluation.copilot_eval.case_synthetic_labeling, 2 (unsupported failure confirmation) by app.evaluation.copilot_eval's adversarial/anomaly-vs-failure cases, 1 (insufficient history) by app.evaluation.robustness's boundary sweeps, and 1 (gap overlapping anomaly) by app.evaluation.dq_impact + tests/test_evaluation_dq_impact.py's DB-backed propagation test \u2014 see docs/SCIENTIFIC_VALIDATION.md for the unified 9-scenario table.",
+      "checks": [
+        {
+          "check": "incompatible_model_artifact",
+          "outcome": "safe_failure",
+          "run_response_status": 500,
+          "run_status_recorded": "failed",
+          "finding": "A persisted detector artifact with a schema-incompatible baseline_summary (simulating drift/corruption) did not crash the server or fabricate a successful result: the detection run was created, then honestly marked FAILED with a recorded error_message, and the API returned a generic 500. The raw error message stored is a low-level Python TypeError string rather than a curated diagnostic \u2014 a real, minor limitation worth noting, distinct from the safe-failure property itself which held."
+        },
+        {
+          "check": "malformed_timestamp_is_quarantined_per_record",
+          "outcome": "safe_and_documented",
+          "status_code": 200,
+          "records_accepted": 5,
+          "records_rejected": 1,
+          "finding": "A genuinely unparseable timestamp string at index 3 of a 6-record batch was quarantined as one indexed RecordError; the other 5 well-formed records were still accepted (200, not a whole-batch 422) \u2014 this platform's deliberate list[dict]-not-list[Model] request schema (see app.schemas.ingestion.IngestionRequest's own docstring) holds even for a completely unparseable value, not just semantically-invalid-but-parseable ones."
+        },
+        {
+          "check": "extreme_value_scoring_does_not_crash",
+          "outcome": "safe",
+          "run_status": 201,
+          "anomalies_found": 1,
+          "all_scores_finite": true,
+          "finding": "A physically-implausible extreme value (1e12) in the scoring window was flagged as an anomaly with a finite (non-NaN, non-Inf) raw_score/normalized_score \u2014 no numeric overflow reached the stored evidence."
+        },
+        {
+          "check": "annotation_vs_model_conflict_preserves_both",
+          "outcome": "provenance_preserved",
+          "detection_fields_unchanged": true,
+          "review_stored_separately": true,
+          "finding": "A human review disagreeing with the detector (false_positive + explanatory note) changed only the anomaly's status; every original detection field (raw_score, threshold, severity_tier, explanation) stayed byte-identical, and the human's disagreement is preserved as its own separate, queryable AnomalyInvestigation record \u2014 the model's original output and the human's interpretation coexist as distinct evidence rather than one overwriting the other."
+        },
+        {
+          "check": "disagreeing_detectors_no_forced_consensus",
+          "outcome": "disagreement_preserved",
+          "robust_zscore_flagged": true,
+          "isolation_forest_flagged": false,
+          "finding": "robust_zscore (sensitive default threshold) flagged the injected spike while isolation_forest (deliberately configured with a far less sensitive threshold) did not \u2014 both detectors' runs completed and are independently queryable with their own real output; nothing in the platform forces a merged or averaged verdict between disagreeing detectors, and orchestration_service's cross_detector_agreement factor correctly reflects only AGREEMENT, never manufacturing false consensus when detectors disagree."
+        }
+      ]
+    }
+  }
+}
