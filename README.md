@@ -1,5 +1,9 @@
 # Industrial AI Predictive Intelligence Platform
 
+**[Live demo](https://industrial-predictive-intelligence.vercel.app)**: click *Explore the live demo* (a guest session on a
+synthetic plant; no sign-up). The API runs on Render's free tier, so the first visit after a quiet spell takes about a
+minute while it wakes.
+
 A decision-support platform for industrial equipment monitoring: it
 ingests sensor time-series data, validates and stores it immutably,
 detects statistically unusual behavior with three complementary methods
