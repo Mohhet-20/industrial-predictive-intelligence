@@ -1,5 +1,5 @@
 """Closed-loop outcome, verification, and evaluation domain tables
-(Phase 12).
+.
 
 CORE PRINCIPLE, enforced throughout every table below:
 
@@ -8,14 +8,14 @@ CORE PRINCIPLE, enforced throughout every table below:
     MAINTENANCE EVENTS ARE NOT AUTOMATICALLY FAILURES.
     OUTCOMES MUST HAVE PROVENANCE.
 
-MANDATORY AUDIT FINDING (Phase 12 §0), which this schema is built from:
-as of this phase, this platform has ZERO real-world verified outcome
-data. `app.models.intelligence.MaintenanceEvent` has existed since Phase 1
+MANDATORY AUDIT FINDING, which this schema is built from:
+currently, this platform has ZERO real-world verified outcome
+data. `app.models.intelligence.MaintenanceEvent` has existed
 as an explicitly documented stub ("PLANNED — no ingestion workflow exists
 yet") with zero rows and zero real code references anywhere outside its
 own definition. `app.models.investigation.InvestigationAnnotation`
 explicitly documents itself as distinct from "a verified outcome (a
-concept this platform does NOT implement)" prior to this phase. No
+concept this platform does NOT implement)" previously. No
 CMMS/ERP/work-order integration exists. `OutcomeSource` below therefore has
 exactly one member — not a placeholder for a future integration, an honest
 statement of the only source that currently exists: a human typing a
@@ -38,7 +38,7 @@ Table map:
   never an edit to a past one.
 - `RetrainingCandidate` — a proposal to consider retraining a component,
   reviewed by a human before it ever reaches
-  `app.services.mlops_service.request_retraining` (Phase 5's existing,
+  `app.services.mlops_service.request_retraining` (the existing,
   unmodified, human-initiated retraining workflow).
 - `FeedbackDatasetBuild` — a frozen, versioned snapshot of verified+assessed
   rows, built for external use. Never includes unverified feedback.
@@ -94,7 +94,7 @@ class Outcome(TimestampMixin, Base):
     starts UNVERIFIED (enforced in app.services.feedback_service, not here)
     — reporting an outcome is never itself verification.
 
-    Two distinct clocks (Phase 15 Phase I), never conflated: `outcome_timestamp`
+    Two distinct clocks, never conflated: `outcome_timestamp`
     is WHEN THE REAL-WORLD EVENT OCCURRED, as the reporting human states it —
     it can be backdated (reporting today that something happened last week).
     `created_at` (from TimestampMixin) is WHEN THIS REPORT BECAME KNOWN TO THE
@@ -156,7 +156,7 @@ class OutcomeVerification(Base):
 
 class OutcomeSignalType(str, enum.Enum):
     """The four kinds of prior signal an outcome can be linked to.
-    SCENARIO_RUN exists so a Scenario Lab (Phase 11) result can be
+    SCENARIO_RUN exists so a Scenario Lab result can be
     compared against a real outcome for a human's own benefit — see
     OutcomeSignalLink.counts_toward_evaluation, which is server-computed
     False for this signal_type and cannot be overridden by a client."""
@@ -172,7 +172,7 @@ class SignalAssessment(str, enum.Enum):
     inferred automatically from Outcome.outcome_type or
     Outcome.verification_status. Without this field, computing a
     false-positive/false-negative count would require guessing root cause
-    from the outcome's category alone, which Phase 12 §9 explicitly
+    from the outcome's category alone, which explicitly
     prohibits ("do not automatically infer root cause")."""
 
     NOT_YET_ASSESSED = "not_yet_assessed"
@@ -270,7 +270,7 @@ class RetrainingCandidateStatus(str, enum.Enum):
 class RetrainingCandidate(Base):
     """A proposal to consider retraining — never itself trains or
     activates anything. Approval calls the existing, unmodified
-    app.services.mlops_service.request_retraining (Phase 5); this table
+    app.services.mlops_service.request_retraining; this table
     only records the proposal and the human decision on it."""
 
     __tablename__ = "retraining_candidates"

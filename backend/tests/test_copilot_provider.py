@@ -1,4 +1,4 @@
-"""Unit tests for the LLM provider abstraction (Phase 9 §9).
+"""Unit tests for the LLM provider abstraction.
 
 AnthropicProvider is tested against a MOCKED httpx transport — no network
 call is made, and no live Anthropic API call has ever been exercised in

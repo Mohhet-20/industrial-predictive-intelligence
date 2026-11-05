@@ -1,4 +1,4 @@
-"""Scenario Simulation / What-If Analysis API (Phase 11 §12, §18).
+"""Scenario Simulation What-If Analysis API.
 
 THIS IS SCENARIO ANALYSIS, NOT A PERFECT PHYSICAL DIGITAL TWIN — see
 app.simulation's package docstring. Every route here is organization-scoped
@@ -9,7 +9,7 @@ docstring for the non-destructive guarantee. Creating, validating, and
 running a scenario require ADMIN or ENGINEER; reading is open to any
 authenticated org member, matching app.api.v1.condition's role split.
 
-DELETE archives rather than hard-deletes (§12) — every prior run and its
+DELETE archives rather than hard-deletes — every prior run and its
 results stay inspectable, the same "delete = archive" discipline this
 platform uses everywhere else evidence must survive a cleanup action.
 """
@@ -128,7 +128,7 @@ def run_sensitivity_sweep(
     org_id: str = Depends(organization_scope), user: User = Depends(require_roles(*_WRITE_ROLES)), db: Session = Depends(get_db),
 ) -> ScenarioRunResponse:
     """Sweeps magnitude across the given values, re-running the real
-    pipeline at each one against the same real baseline data (§9). Reports
+    pipeline at each one against the same real baseline data. Reports
     what actually happened at each magnitude — never fits or extrapolates a
     trend, and never claims a physical dose-response relationship."""
     run = scenario_service.run_sensitivity_sweep(db, organization_id=org_id, user_id=user.id, scenario_id=scenario_id, magnitudes=payload.magnitudes)
@@ -154,7 +154,7 @@ def get_scenario_run(run_id: str, org_id: str = Depends(organization_scope), db:
 def compare_scenario_runs(
     payload: ScenarioCompareRequest, org_id: str = Depends(organization_scope), db: Session = Depends(get_db)
 ) -> ScenarioCompareResponse:
-    """Multi-scenario comparison (§8) — lists each run's real result side
+    """Multi-scenario comparison — lists each run's real result side
     by side. No fabricated combined risk score is ever computed."""
     data = scenario_service.compare_scenario_runs(db, organization_id=org_id, run_ids=payload.scenario_run_ids)
     return ScenarioCompareResponse(data=data)

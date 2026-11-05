@@ -1,4 +1,4 @@
-"""Degradation & long-term change classification (Phase 4 §3).
+"""Degradation & long-term change classification.
 
 THREE-WAY DISTINCTION, deliberately conservative:
 
@@ -22,12 +22,12 @@ THREE-WAY DISTINCTION, deliberately conservative:
                          action (app.services.condition_service.
                          validate_degradation_signal) — never set
                          automatically. This platform has no maintenance-
-                         outcome data (see the Phase 4 evidence audit in
+                         outcome data (see the evidence audit in
                          docs/CONDITION_INTELLIGENCE.md: MaintenanceEvent
                          has no ingestion workflow and holds zero rows) to
                          confirm a candidate against. Auto-promoting to
                          "validated" would be exactly the unearned
-                         confidence Phase 4 explicitly forbids.
+                         confidence explicitly forbids.
 
 None of this is a trained model. It is a documented, deterministic,
 inspectable rule set over real statistics computed by app.timeseries and
@@ -68,7 +68,7 @@ def compute_sub_window_trends(series: pd.Series, *, window_start: datetime, wind
     """Splits [window_start, window_end] into SUB_WINDOW_COUNT equal,
     non-overlapping, chronologically-ordered sub-windows (reusing
     app.timeseries.splitting.chronological_split with equal fractions —
-    the same leakage-verified boundary machinery Phase 2 built, applied
+    the same leakage-verified boundary machinery built, applied
     here to get independent sub-windows rather than train/test splits) and
     fits an independent OLS trend in each."""
     fraction = 1.0 / SUB_WINDOW_COUNT

@@ -50,7 +50,7 @@ def register_organization(
 # email still pays the same bcrypt cost a real password check would —
 # without it, "user not found" returns measurably faster than "wrong
 # password", which is a timing side-channel that lets an attacker enumerate
-# valid emails purely from response latency. Phase 7 §10 fix.
+# valid emails purely from response latency. fix.
 _DUMMY_HASH = hash_password("not-a-real-password-used-only-for-timing-equalization")
 
 

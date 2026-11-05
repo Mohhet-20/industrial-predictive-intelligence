@@ -10,7 +10,7 @@ import type {
   CopilotSuggestedQuestionsResponse,
 } from "@/api/types";
 
-/** Evidence-grounded AI copilot panel (Phase 9). Deliberately embedded in
+/** Evidence-grounded AI copilot panel. Deliberately embedded in
  * the page it's relevant to (asset detail, an open investigation, an
  * anomaly) rather than a floating global chatbot — it only ever answers
  * about the evidence the current page's context actually has, and it is

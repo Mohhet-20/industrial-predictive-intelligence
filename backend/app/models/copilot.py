@@ -1,4 +1,4 @@
-"""Copilot conversation persistence (Phase 9).
+"""Copilot conversation persistence.
 
 The copilot is an OPTIONAL, provider-dependent interface layered on top
 of the platform's real intelligence — see docs/COPILOT.md. These two
@@ -34,8 +34,8 @@ class CopilotContextType(str, enum.Enum):
     INVESTIGATION = "investigation"
     ANOMALY = "anomaly"
     DEGRADATION_SIGNAL = "degradation_signal"
-    SCENARIO = "scenario"  # Phase 11 — a saved what-if Scenario/ScenarioRun; answers must state the data is simulated
-    OUTCOME = "outcome"  # Phase 12 — a reported Outcome and its verification/links/evaluation evidence
+    SCENARIO = "scenario"  # a saved what-if Scenario/ScenarioRun; answers must state the data is simulated
+    OUTCOME = "outcome"  # a reported Outcome and its verification/links/evaluation evidence
 
 
 class CopilotConversation(TimestampMixin, Base):

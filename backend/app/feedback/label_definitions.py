@@ -1,5 +1,5 @@
 """Explicit, versioned, human-readable label governance definitions
-(Phase 12 §18).
+.
 
 Every status and classification this platform's closed-loop machinery uses
 is defined here in plain language and exposed through the

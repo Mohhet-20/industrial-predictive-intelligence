@@ -2,7 +2,7 @@
 # monolith, per ARCHITECTURE.md §3) — no separate worker image, because the
 # background job runner (app/jobs/runner.py) runs in-process inside this
 # same server, not as a separate process. See docs/RELIABILITY_AND_OPERATIONS.md
-# §1 for why this is the right shape for what this app actually is, and §17
+# for why this is the right shape for what this app actually is, and
 # for how to run it.
 
 FROM python:3.11-slim AS base

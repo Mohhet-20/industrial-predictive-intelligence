@@ -1,32 +1,31 @@
 # Equipment Condition Intelligence & Forecasting — What This Layer Does and Doesn't Do
 
-Status: **Phase 4 — Predictive Risk, Equipment Condition Intelligence &
-Evidence-Based Forecasting.** This describes what is actually implemented
-and tested today, built on top of Phase 3's anomaly detection layer (see
+This describes what is actually implemented
+and tested today, built on top of the anomaly detection layer (see
 [ANOMALY_DETECTION.md](./ANOMALY_DETECTION.md)) without modifying it.
 
-**Core principle, carried forward and sharpened from Phase 3's
-ANOMALY ≠ FAILURE: this platform distinguishes ANOMALY (Phase 3: a
-detector-flagged unusual period), CONDITION SIGNAL (this phase: trend/
+**Core principle, carried forward and sharpened from the anomaly layer:
+ANOMALY ≠ FAILURE: this platform distinguishes ANOMALY (a
+detector-flagged unusual period), CONDITION SIGNAL (trend/
 deviation/variance/anomaly-persistence evidence about a sensor's recent
-behavior), RISK ESTIMATE (this phase: a transparent, non-probabilistic
+behavior), RISK ESTIMATE (a transparent, non-probabilistic
 priority ordering — never a fabricated likelihood), and FAILURE PREDICTION
 (NOT implemented — see §0). These four words are never used
 interchangeably anywhere in this codebase, its API, or its UI.**
 
 ## 0. The evidence audit that determined what could be built
 
-Phase 4's own instructions require this audit to happen fresh, against
+the own instructions require this audit to happen fresh, against
 the real repository, before writing any modeling code — not from memory
-of what earlier phases assumed. It was re-run at the start of this
+of what earlier work assumed. It was re-run at the start of this
 phase's work. Findings:
 
 - **`MaintenanceEvent`** (`app.models.intelligence.MaintenanceEvent`):
   exists in the schema, described in its own docstring as "PLANNED — no
   ingestion workflow exists yet." Re-confirmed: **zero rows**, no API
   endpoint creates or reads one, no ingestion workflow of any kind.
-- **The old `Prediction` table**: existed in the Phase-3 schema,
-  explicitly reserved for this phase's work, and had **zero rows** in
+- **The old `Prediction` table**: existed in the original schema,
+  explicitly reserved for this work, and had **zero rows** in
   every environment this schema has run in. It has been dropped and
   replaced by `ForecastModel`/`ForecastRun` (see §3) — see the migration
   and `app.models.condition`'s module docstring.
@@ -34,12 +33,12 @@ phase's work. Findings:
   real (synthetically-generated but genuinely stored and queried)
   measurements across 9 sensors on 4 assets, spanning ~21 days. No
   sensor's row carries a failure label, a fault flag, or any outcome
-  field. `app.synthetic.generator` (Phase 1) injects spikes, gaps, and
+  field. `app.synthetic.generator` injects spikes, gaps, and
   one slow linear drift (`bearing_temp_de` on `PUMP-07`,
   `drift_per_day=0.05`) for demo realism — but these are unlabeled: there
   is no ground-truth timestamp anywhere saying "this is when the bearing
   actually degraded," only the raw sensor values themselves.
-- **Phase 3's `Anomaly`/`AnomalyInvestigation` tables**: real, but they
+- **the `Anomaly`/`AnomalyInvestigation` tables**: real, but they
   record *statistical unusualness*, not *failure outcomes*. An anomaly's
   `status` (resolved/false_positive/etc.) is a human's review judgment
   about the anomaly itself, never a confirmed link to an equipment
@@ -49,17 +48,17 @@ phase's work. Findings:
   `expected_interval_seconds` — operational metadata, not condition or
   outcome data.
 
-**Conclusion — which path applies (of Phase 4's Paths A/B/C/D):**
+**Conclusion — which path applies (of the Paths A/B/C/D):**
 
 | Path | Requires | Supported here? |
 |---|---|---|
 | A — verified failure/outcome labels | Real records of what actually failed and when | **No.** Nothing in this schema or dataset records a failure outcome. |
 | B — maintenance history (weak labels) | `MaintenanceEvent` rows correlating to sensor behavior | **No.** Zero rows, no ingestion workflow. |
 | C — unlabeled sensor data only | Real time-series, no outcome labels | **Yes.** This is what actually exists: 47,489 real measurements, no labels. |
-| D — synthetic labels | Code-injected, deterministically-seeded events, for pipeline validation only | **Available, and used** — exactly like Phase 3's `synthetic_scenarios` — but never as a real-world accuracy claim. |
+| D — synthetic labels | Code-injected, deterministically-seeded events, for pipeline validation only | **Available, and used** — exactly like the `synthetic_scenarios` — but never as a real-world accuracy claim. |
 
-**Path C is the primary and only path this phase builds real
-functionality against.** Supervised predictive modeling (Phase 4 §5) is
+**Path C is the primary and only path this layer implements for real
+functionality against.** Supervised predictive modeling is
 explicitly **NOT implemented** — see §15. Every capability below is built
 to work honestly with unlabeled sensor data alone: trend/deviation/
 variance/persistence evidence (no labels needed), a conservative
@@ -73,13 +72,13 @@ capability evaluated against each sensor's own held-out future values
 `app/condition/evidence.py`, exposed at
 `GET /condition/sensors/{id}/evidence`. Five independent evidence types,
 computed fresh on every call (stateless, never persisted — the same
-pattern as Phase 2's `GET /timeseries/sensors/{id}/profile`):
+pattern as the `GET /timeseries/sensors/{id}/profile`):
 
 - **Trend evidence** — reuses `app.timeseries.profiling.compute_profile`'s
   OLS trend line unmodified (same `p < 0.05`, `r² ≥ 0.1` significance
   gate documented in `docs/TEMPORAL_INTELLIGENCE.md`).
 - **Persistent anomaly evidence** — real counts and timing of
-  detector-flagged `Anomaly` rows (Phase 3) for this sensor in the
+  detector-flagged `Anomaly` rows for this sensor in the
   window, including whether their frequency is rising within the window.
   Never re-scored here — this is genuine detection history.
 - **Deviation from baseline** — the analysis window's median compared, in
@@ -116,7 +115,7 @@ does not have.
 - **`degradation_candidate`** — the trend **persists**: the analysis
   window is split into 3 equal, non-overlapping sub-windows (via
   `app.timeseries.splitting.chronological_split` with equal fractions —
-  the same leakage-verified boundary machinery from Phase 2, repurposed
+  the same leakage-verified boundary machinery, repurposed
   here to get independent sub-windows), and at least 2 of 3 must agree on
   a significant trend direction. AND it is **corroborated** by at least
   one independent statistic: deviation from baseline ≥ 2.0 MAD-equivalent
@@ -133,7 +132,7 @@ does not have.
   this directly, including with evidence engineered to be maximally
   favorable). This platform has no maintenance-outcome data (§0) to
   confirm a candidate against — auto-promoting to "validated" would be
-  exactly the unearned confidence Phase 4 forbids.
+  exactly the unearned confidence forbids.
 
 **Live validation against the real seeded dataset:** running this
 analysis against `PUMP-07`'s `bearing_temp_de` sensor (the one sensor
@@ -160,7 +159,7 @@ statistical behavior, self-supervised against its own held-out future
 values (no failure label needed to score it honestly), never surfaced as
 a maintenance recommendation.
 
-**Fitting always backtests** (never optional, unlike Phase 3's detector
+**Fitting always backtests** (never optional, unlike the detector
 evaluation, because the result *gates* whether a forecast run is even
 allowed):
 
@@ -249,14 +248,14 @@ asserts no `score`/`probability` key ever appears on an item.
 ## 8. Lifecycle & human review
 
 `DegradationSignal.status` follows the exact same five-state lifecycle as
-Phase 3's `Anomaly.status` (`detected → under_review → acknowledged →
+the `Anomaly.status` (`detected → under_review → acknowledged →
 resolved / false_positive`, with reopening allowed), enforced by
 `CONDITION_ALLOWED_TRANSITIONS` and recorded append-only in
 `DegradationReview` — see §2 for why `stage` promotion to
 `validated_degradation` is a separate, mandatory-justification action.
 `ForecastModel`/`ForecastRun` have no review lifecycle of their own (they
 are read-only evidence outputs of a versioned, honesty-gated fit, the same
-relationship `ModelVersion`/`ModelRun`/`Anomaly` has in Phase 3) — a
+relationship `ModelVersion`/`ModelRun`/`Anomaly` has) — a
 forecast a reviewer disagrees with is addressed by fitting a new model
 version, never by editing history.
 
@@ -282,7 +281,7 @@ open to any authenticated org member (VIEWER included).
 
 All computation here is **synchronous** — see
 `app.services.condition_service`'s module docstring for why no
-background-job split (unlike Phase 3's detection runs) is needed: every
+background-job split (unlike the detection runs) is needed: every
 operation is a closed-form, single-sensor, bounded-window computation.
 
 ## 10. Frontend — Condition Intelligence page
@@ -327,7 +326,7 @@ get_condition_monitoring_summary`) reports real counts only: degradation
 signals by stage/status, condition/forecast-model run outcomes by status
 — and an explicit `not_implemented` list naming supervised failure
 prediction, the same "real signals only, no fabricated drift metric"
-discipline as Phase 3's `/anomaly/monitoring`.
+discipline as the `/anomaly/monitoring`.
 
 ## 13. Performance and scalability
 
@@ -342,7 +341,7 @@ rows per type before ranking and truncating to the requested `limit`.
 ## 14. Known limitations, stated plainly
 
 - **No failure prediction of any kind.** Supervised predictive modeling
-  (Phase 4 §5) is not implemented because Path A/B are not supported by
+  is not implemented because Path A/B are not supported by
   this platform's data (§0) — this is a data limitation, not an
   engineering shortcut, and it should not be worked around by inventing
   labels.
@@ -355,7 +354,7 @@ rows per type before ranking and truncating to the requested `limit`.
   this fleet's actual `bearing_temp_de` drift, §2) will correctly produce
   no signal rather than a false one — meaning real early-stage wear can
   go unflagged by this method alone. This is the same conservative
-  trade-off Phase 3 makes for anomaly detection thresholds.
+  trade-off makes for anomaly detection thresholds.
 - **`validated_degradation` requires a human every time.** There is no
   mechanism, and none is planned, for this platform to self-confirm a
   degradation candidate — it has no maintenance-outcome data to confirm

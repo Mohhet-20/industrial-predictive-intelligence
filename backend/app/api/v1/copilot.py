@@ -1,10 +1,10 @@
-"""Evidence-grounded AI copilot API (Phase 9).
+"""Evidence-grounded AI copilot API.
 
 Every route here requires authentication (organization_scope, same as the
 rest of the platform) — there is no anonymous or cross-tenant access to
 copilot conversations. No route in this router can control equipment,
 change a schedule, or modify safety configuration: the copilot is
-strictly read/investigate, never act (Phase 9 §10 — see
+strictly read/investigate, never act (see
 docs/COPILOT.md's "industrial safety boundaries" section). Any VIEWER,
 ENGINEER, or ADMIN user may use the copilot to ask about evidence they
 already have read access to; no additional write-role is required
@@ -66,7 +66,7 @@ def get_suggested_questions(
     context_id: str | None = Query(default=None),
     user: User = Depends(get_current_user),
 ) -> SuggestedQuestionsResponse:
-    """Phase 16 fix: this previously had no auth dependency at all,
+    """Fix: this previously had no auth dependency at all,
     contradicting this module's own docstring claim that "every route here
     requires authentication." Deliberately only `get_current_user`, not
     `organization_scope` — like `/status` above, the suggested-question

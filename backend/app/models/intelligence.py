@@ -1,16 +1,16 @@
 """Anomaly detection domain tables.
 
-Status as of Phase 3: ModelVersion, ModelRun, Anomaly, and
+Status: ModelVersion, ModelRun, Anomaly, and
 AnomalyInvestigation are IMPLEMENTED and backed by real detection logic
 (see app/anomaly/* and app/services/anomaly_service.py).
 
-Status as of Phase 4: the `Prediction` table described in earlier
+Status: the `Prediction` table described in earlier
 revisions of this docstring (reserved for, but never populated by, any
 forecasting work) has been DROPPED and replaced by
 app.models.condition.ForecastModel/ForecastRun, which carry a real,
 backtested, honesty-gated forecasting implementation — see
 docs/CONDITION_INTELLIGENCE.md. `MaintenanceEvent` below remains PLANNED:
-the Phase 4 evidence audit (docs/CONDITION_INTELLIGENCE.md §0)
+the evidence audit (docs/CONDITION_INTELLIGENCE.md §0)
 re-confirmed it still has no ingestion workflow and zero rows in every
 environment this schema has run in.
 

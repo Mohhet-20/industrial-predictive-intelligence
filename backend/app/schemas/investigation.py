@@ -1,4 +1,4 @@
-"""Pydantic schemas for the Investigation workflow API (Phase 6).
+"""Pydantic schemas for the Investigation workflow API.
 
 Mirrors app.schemas.anomaly/app.schemas.condition/app.schemas.mlops's
 conventions: fully typed response models for fixed-shape rows, a loose

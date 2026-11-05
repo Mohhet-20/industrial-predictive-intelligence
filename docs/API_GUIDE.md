@@ -117,8 +117,7 @@ territory.
 ## 5. A real workflow, end to end
 
 The endpoints above compose into the platform's actual investigation
-workflow like this (see `docs/PORTFOLIO_NARRATIVE.md` for the same flow
-narrated as a demo script):
+workflow like this:
 
 ```
 POST /auth/login

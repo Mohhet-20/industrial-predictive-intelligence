@@ -8,7 +8,7 @@ interface State {
   error: Error | null;
 }
 
-/** Route-level error boundary (Phase 7, §9). Catches a render-time crash
+/** Route-level error boundary. Catches a render-time crash
  * in whichever page is currently mounted inside Layout's <Outlet/> and
  * shows a real, honest failure state instead of a blank white screen — the
  * nav/header chrome around it (which lives outside this boundary, in

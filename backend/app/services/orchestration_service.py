@@ -1,12 +1,12 @@
 """Intelligence orchestration: unified timeline, evidence-based
 prioritization, cross-layer synthesis, cross-sensor context, and
-model/method provenance (Phase 6, spec §3/§4/§5/§8/§11).
+model/method provenance.
 
-CORE DISCIPLINE (spec's own words): CONNECT evidence, PRESERVE provenance,
+CORE DISCIPLINE: CONNECT evidence, PRESERVE provenance,
 SURFACE relevant context, HELP humans prioritize. Nothing in this module
 computes a fabricated composite "health score", asserts causality between
 sensors, or claims a probability of failure. Every function below either
-reads real rows from Phases 1-5's tables directly, or performs a plainly
+reads real rows from the tables directly, or performs a plainly
 documented, inspectable aggregation over them — the aggregation formula is
 always returned alongside the result, never hidden inside a single number.
 
@@ -64,7 +64,7 @@ def _sensor_ids_for_asset(db: Session, *, organization_id: str, asset_id: str) -
 
 
 # ---------------------------------------------------------------------------
-# §3 — Unified asset intelligence timeline
+# — Unified asset intelligence timeline
 # ---------------------------------------------------------------------------
 
 TIMELINE_CATEGORIES = {
@@ -80,14 +80,14 @@ TIMELINE_CATEGORIES = {
     "human_annotation": "human_interpretation",
 }
 """Every timeline event is tagged with exactly one of five categories (spec
-§5 asks for four — OBSERVED DATA / ANALYTICAL SIGNAL / MODEL OUTPUT / HUMAN
+ asks for four — OBSERVED DATA ANALYTICAL SIGNAL MODEL OUTPUT HUMAN
 INTERPRETATION; this platform adds a fifth, GOVERNANCE, for component
 activation/rollback/retirement events, because those are neither raw data,
 a statistical signal about data, a model's output about data, nor a
 human's interpretation of evidence — they are a system/process event about
 which VERSION of a method was in effect. Collapsing them into
 'model_output' would misrepresent what they are, so this module documents
-the deliberate 5th category rather than forcing the spec's four)."""
+the deliberate 5th category rather than forcing the design's four)."""
 
 
 def _components_covering_sensor(db: Session, *, organization_id: str, sensor_id: str) -> list[str]:
@@ -97,7 +97,7 @@ def _components_covering_sensor(db: Session, *, organization_id: str, sensor_id:
     sensor, or a FORECAST_MODEL-kind component whose ForecastModel.sensor_id
     matches. This is a real join through a JSON column, not a guess — but
     it can only find components that were actually registered in the
-    Phase 5 governance layer; an un-registered ModelVersion/ForecastModel
+    Governance layer; an un-registered ModelVersion/ForecastModel
     produces no timeline governance events, which is correct (there is no
     governance history for something never registered)."""
     component_ids: list[str] = []
@@ -213,7 +213,7 @@ def get_asset_intelligence_timeline(
             })
 
     # Component lifecycle events relevant to this asset's sensors — a 5th
-    # category (GOVERNANCE) beyond the spec's four — see TIMELINE_CATEGORIES.
+    # category (GOVERNANCE) beyond the design's four — see TIMELINE_CATEGORIES.
     component_ids: set[str] = set()
     for sid in sensor_ids:
         component_ids.update(_components_covering_sensor(db, organization_id=organization_id, sensor_id=sid))
@@ -286,7 +286,7 @@ def get_asset_intelligence_timeline(
 
 
 # ---------------------------------------------------------------------------
-# §4 — Evidence-based prioritization
+# — Evidence-based prioritization
 # ---------------------------------------------------------------------------
 
 
@@ -372,7 +372,7 @@ def get_prioritized_signals(db: Session, *, organization_id: str, limit: int) ->
             "observed_unusual_behavior=1. persistence_count: number of OTHER open signals/anomalies on the same "
             "sensor (a proxy for how repeatedly this sensor has been flagged, capped at 5). "
             "nearby_data_quality_issue_count is surfaced as context, not scored — there is no validated basis for "
-            "a specific penalty weight (the same honesty this platform applies to not implementing PSI in Phase 5's "
+            "a specific penalty weight (the same honesty this platform applies to not implementing PSI in the "
             "shift analysis). This is a transparent priority ORDERING for human triage, not a probability of failure "
             "and not a fabricated composite health score — no likelihood-of-failure number is computed anywhere in "
             "this platform."
@@ -381,14 +381,14 @@ def get_prioritized_signals(db: Session, *, organization_id: str, limit: int) ->
 
 
 # ---------------------------------------------------------------------------
-# §5 — Cross-layer intelligence synthesis: asset intelligence summary
+# — Cross-layer intelligence synthesis: asset intelligence summary
 # ---------------------------------------------------------------------------
 
 
 def get_asset_intelligence_summary(db: Session, *, organization_id: str, asset_id: str) -> dict[str, Any]:
     """Evidence AGGREGATION, not fabricated reasoning: every number below is
     a real count or a real reference, grouped into the four categories spec
-    §5 requires kept distinct. No field here combines unrelated signals
+    requires kept distinct. No field here combines unrelated signals
     into a single score."""
     asset = _get_asset(db, organization_id=organization_id, asset_id=asset_id)
     sensor_ids = _sensor_ids_for_asset(db, organization_id=organization_id, asset_id=asset_id)
@@ -465,14 +465,14 @@ def get_asset_intelligence_summary(db: Session, *, organization_id: str, asset_i
 
 
 # ---------------------------------------------------------------------------
-# §8 — Contextual cross-sensor investigation
+# — Contextual cross-sensor investigation
 # ---------------------------------------------------------------------------
 
 
 def get_cross_sensor_context(
     db: Session, *, organization_id: str, asset_id: str, sensor_ids: list[str], start: datetime, end: datetime, freq_seconds: float
 ) -> dict[str, Any]:
-    """Real correlation (app.timeseries.multi_sensor, built in Phase 2) plus
+    """Real correlation (app.timeseries.multi_sensor, built) plus
     an overlay of real open anomalies/degradation signals on each sensor in
     the window. Language is deliberately non-causal throughout — see the
     `note` field and every per-pair description below. NEVER says "caused
@@ -536,14 +536,14 @@ def get_cross_sensor_context(
 
 
 # ---------------------------------------------------------------------------
-# §11 — Model and method provenance in user workflows
+# — Model and method provenance in user workflows
 # ---------------------------------------------------------------------------
 
 
 def get_evidence_provenance(db: Session, *, organization_id: str, evidence_type: str, evidence_id: str) -> dict[str, Any]:
     """Signal -> Method/Detector/Model -> Version -> Configuration ->
     Feature/Data Definition -> Training/Reference Context -> Evaluation
-    Evidence, per spec §11. Returns a `summary` level (what a normal user
+    Evidence, per. Returns a `summary` level (what a normal user
     needs) and a `technical` level (full config/evaluation payload) for
     progressive disclosure — the frontend decides how much to show by
     default."""

@@ -1,4 +1,4 @@
-"""Scenario validation (Phase 11 §3) — a pure, DB-independent check.
+"""Scenario validation — a pure, DB-independent check.
 
 Every input here is already-loaded (sensor metadata, a baseline
 observation count, a robust-statistics summary of the baseline window) so

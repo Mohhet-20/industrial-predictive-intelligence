@@ -1,6 +1,6 @@
-"""Equipment Condition Intelligence & Forecasting domain tables (Phase 4).
+"""Equipment Condition Intelligence & Forecasting domain tables.
 
-Built on top of Phase 3's anomaly-detection tables (app.models.intelligence)
+Built on top of the anomaly-detection tables (app.models.intelligence)
 without modifying them. See docs/CONDITION_INTELLIGENCE.md §0 for the
 evidence audit that determined which of this schema's capabilities are
 actually implemented (Path C: unlabeled sensor data only — no verified
@@ -25,7 +25,7 @@ own conventions:
   table — the same "don't persist an unbounded low-value table" reasoning
   as ModelRun.metrics (see app.models.intelligence's module docstring).
 - This module supersedes and replaces the empty, never-implemented
-  `Prediction` table from Phase 3's schema (see the migration that drops
+  `Prediction` table from the schema (see the migration that drops
   it) — `Prediction` was reserved for exactly this work and had zero rows
   in every environment this schema has run in.
 """

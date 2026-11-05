@@ -1,4 +1,4 @@
-"""Tests for app.evaluation.robustness (Phase 10 §5/§15).
+"""Tests for app.evaluation.robustness.
 
 These test that the EVALUATION METHODOLOGY itself is correct — that each
 scenario measures what it claims to measure and is deterministic — not

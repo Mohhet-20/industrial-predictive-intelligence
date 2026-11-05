@@ -16,7 +16,7 @@ scipy==1.14.1
 scikit-learn==1.5.2
 
 # httpx was originally a test-only dependency (FastAPI's TestClient needs
-# it); Phase 9's optional copilot also uses it for the real Anthropic API
+# it); the optional copilot also uses it for the real Anthropic API
 # call, so it's now a real (if optional-feature) runtime dependency too.
 httpx==0.28.1
 

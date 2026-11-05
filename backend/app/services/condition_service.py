@@ -1,5 +1,5 @@
 """Orchestration layer for Equipment Condition Intelligence & Forecasting
-(Phase 4): resolves organization/sensor scope, loads bounded data,
+: resolves organization/sensor scope, loads bounded data,
 delegates all actual computation to the DB-agnostic app.condition.*
 modules, and persists results. Mirrors app.services.anomaly_service's
 structure and conventions throughout.
@@ -8,7 +8,7 @@ Everything in this module is synchronous — condition/degradation analysis
 and forecast fitting both operate on a single sensor's bounded time range
 (same MAX_ROWS enforcement as every other timeseries/anomaly read) and are
 closed-form/O(n) computations, not iterative training. There is no
-analogue to Phase 3's MAX_DETECTION_ROWS_SYNC async split here because
+analogue to the MAX_DETECTION_ROWS_SYNC async split here because
 nothing in this module's compute path scales the way a multi-sensor
 Isolation Forest fit or a multi-week detection scan can.
 """
@@ -63,7 +63,7 @@ CONDITION_ALLOWED_TRANSITIONS: dict[ConditionSignalStatus, set[ConditionSignalSt
 
 
 # ---------------------------------------------------------------------------
-# Condition evidence (§2) — stateless, computed fresh on every call, never
+# Condition evidence — stateless, computed fresh on every call, never
 # persisted. Mirrors the read pattern of GET /timeseries/sensors/{id}/profile.
 # ---------------------------------------------------------------------------
 
@@ -116,7 +116,7 @@ def _recent_anomalies_as_dicts(db: Session, *, organization_id: str, sensor_id: 
 
 
 # ---------------------------------------------------------------------------
-# Degradation & long-term change analysis (§3) — persisted, reviewable.
+# Degradation & long-term change analysis — persisted, reviewable.
 # ---------------------------------------------------------------------------
 
 
@@ -305,7 +305,7 @@ def list_degradation_reviews(db: Session, *, organization_id: str, signal_id: st
 
 
 # ---------------------------------------------------------------------------
-# Forecasting (§4) — honesty-gated: fitting ALWAYS backtests against naive
+# Forecasting — honesty-gated: fitting ALWAYS backtests against naive
 # baselines; a forecast run is only permitted when the backtest showed the
 # candidate method actually earns its keep.
 # ---------------------------------------------------------------------------
@@ -445,7 +445,7 @@ def list_forecast_runs(db: Session, *, organization_id: str, forecast_model_id: 
 
 
 # ---------------------------------------------------------------------------
-# Risk prioritization (§11) — a transparent, non-probabilistic attention
+# Risk prioritization — a transparent, non-probabilistic attention
 # list. The sort key is fully exposed in every item, not hidden inside a
 # single fabricated "risk score."
 # ---------------------------------------------------------------------------
@@ -507,7 +507,7 @@ def get_attention_list(db: Session, *, organization_id: str, limit: int) -> dict
 
 
 # ---------------------------------------------------------------------------
-# Monitoring (§16) — real, measurable signals only, mirroring
+# Monitoring — real, measurable signals only, mirroring
 # app.services.anomaly_service.get_monitoring_summary.
 # ---------------------------------------------------------------------------
 

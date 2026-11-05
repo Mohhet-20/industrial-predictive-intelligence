@@ -1,4 +1,4 @@
-"""Copilot orchestration (Phase 9 §3/§6/§7): ties evidence retrieval,
+"""Copilot orchestration: ties evidence retrieval,
 grounding, the LLM provider, and the post-generation safeguard together
 into one answer. This is the ONLY place those pieces are wired together —
 the API layer never calls app/copilot/tools.py or app/copilot/providers.py
@@ -84,12 +84,12 @@ def _gather_context_evidence(
         # history and the surrounding context is usually what's needed).
         return tools.get_condition_history(db, organization_id=organization_id, sensor_id=context_id)
     if context_type == CopilotContextType.SCENARIO:
-        # Phase 11 §15 — context_id is a scenario id. get_scenario_evidence
+        # Context_id is a scenario id. get_scenario_evidence
         # is the only tool that can surface a hypothetical result, and it
         # labels every one of its items as simulated (never observed).
         return tools.get_scenario_evidence(db, organization_id=organization_id, scenario_id=context_id)
     if context_type == CopilotContextType.OUTCOME:
-        # Phase 12 — context_id is an outcome id.
+        # Context_id is an outcome id.
         return tools.get_outcome_evidence(db, organization_id=organization_id, outcome_id=context_id)
     return []
 
@@ -141,7 +141,7 @@ def gather_evidence(
     so refs are stable for exactly the evidence actually sent to the
     model. Raises NotFoundError/ValidationFailedError from the underlying
     tools unchanged — the API layer turns those into the same honest error
-    responses every other endpoint uses (Phase 9 §3)."""
+    responses every other endpoint uses."""
     items = _gather_context_evidence(db, organization_id=organization_id, context_type=context_type, context_id=context_id)
     items += _resolve_evidence_selection(db, organization_id=organization_id, selection=evidence_selection)
     items = _dedupe(items)

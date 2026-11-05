@@ -1,7 +1,7 @@
 """A minimal, honestly-scoped in-memory rate limiter.
 
 Used for exactly one thing right now: slowing down credential-guessing
-against POST /auth/login (see §10 of docs/RELIABILITY_AND_OPERATIONS.md).
+against POST /auth/login (see of docs/RELIABILITY_AND_OPERATIONS.md).
 This is a fixed-window counter keyed by (client IP, attempted email) held
 in process memory — not a distributed limiter, not backed by Redis, and it
 resets on process restart or scales per-worker if this process is ever run

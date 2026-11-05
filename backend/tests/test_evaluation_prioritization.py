@@ -1,9 +1,9 @@
-"""Tests for app.evaluation.prioritization (Phase 10 §8/§15).
+"""Tests for app.evaluation.prioritization.
 
 Basic prioritization correctness (contributing factors exposed,
 cross-detector agreement raises score, org scoping, auth) is already
 covered by tests/test_api_orchestration.py. These tests assert on the
-SUBSTANCE of each Phase 10 §8 edge case's outcome, not just that the
+SUBSTANCE of each edge case's outcome, not just that the
 functions run without raising.
 """
 from app.evaluation import prioritization

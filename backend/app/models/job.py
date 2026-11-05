@@ -46,7 +46,7 @@ class BackgroundJob(Base):
     retry_count: Mapped[int] = mapped_column(default=0, nullable=False)
     max_retries: Mapped[int] = mapped_column(default=0, nullable=False)
 
-    # Phase 7: an optional caller-supplied key (e.g. a ModelRun or
+    # An optional caller-supplied key (e.g. a ModelRun or
     # DatasetBuild id) identifying the underlying unit of work. submit()
     # uses this to detect an already-QUEUED/RUNNING job for the same
     # (organization_id, job_type, dedup_key) and return its id instead of

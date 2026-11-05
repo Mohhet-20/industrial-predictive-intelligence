@@ -129,7 +129,7 @@ export interface ReadinessResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Reliability & observability (Phase 7)
+// Reliability & observability
 // ---------------------------------------------------------------------------
 
 export interface SystemMetricsResponse {
@@ -158,7 +158,7 @@ export interface SystemMetricsResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Time-Series Intelligence (Phase 2)
+// Time-Series Intelligence
 // ---------------------------------------------------------------------------
 
 export interface AnalysisEnvelope<T> {
@@ -300,7 +300,7 @@ export interface CorrelationResult {
 }
 
 // ---------------------------------------------------------------------------
-// Anomaly Detection Intelligence (Phase 3)
+// Anomaly Detection Intelligence
 // ---------------------------------------------------------------------------
 
 export type DetectorType = "robust_zscore" | "isolation_forest" | "mahalanobis";
@@ -419,7 +419,7 @@ export interface AnomalyMonitoringSummary {
 export type JobStatus = "queued" | "running" | "succeeded" | "failed";
 
 // ---------------------------------------------------------------------------
-// Equipment Condition Intelligence & Forecasting (Phase 4)
+// Equipment Condition Intelligence & Forecasting
 // ---------------------------------------------------------------------------
 
 export type DegradationStage = "observed_trend" | "degradation_candidate" | "validated_degradation";
@@ -581,7 +581,7 @@ export interface ConditionMonitoringSummary {
 }
 
 // ---------------------------------------------------------------------------
-// Phase 5 — Intelligence Lifecycle, Registry & Governance (MLOps)
+// Intelligence Lifecycle, Registry & Governance (MLOps)
 // ---------------------------------------------------------------------------
 
 export type ComponentType = "trained_ml_model" | "statistical_detector" | "forecasting_model" | "heuristic_signal_method";
@@ -695,7 +695,7 @@ export interface MlopsMonitoringSummary {
 }
 
 // ---------------------------------------------------------------------------
-// Phase 6 — Intelligence Orchestration, Investigations & Decision Support
+// Intelligence Orchestration, Investigations & Decision Support
 // ---------------------------------------------------------------------------
 
 export type InvestigationStatus = "open" | "under_review" | "awaiting_context" | "resolved" | "closed";
@@ -860,7 +860,7 @@ export interface JobResponse {
 }
 
 // ---------------------------------------------------------------------------
-// AI Copilot (Phase 9) — see docs/COPILOT.md. The copilot is OPTIONAL and
+// AI Copilot — see docs/COPILOT.md. The copilot is OPTIONAL and
 // provider-dependent: `CopilotStatusResponse.configured` tells the frontend
 // whether natural-language answers are available; the retrieved evidence
 // itself is always real and always shown either way, never a placeholder.
@@ -935,7 +935,7 @@ export interface CopilotEvidenceSelection {
 }
 
 // ---------------------------------------------------------------------------
-// Scenario Simulation / What-If Analysis (Phase 11)
+// Scenario Simulation What-If Analysis
 //
 // THIS IS SCENARIO ANALYSIS, NOT A PERFECT PHYSICAL DIGITAL TWIN. Every
 // scenario result below is a hypothetical, non-destructive what-if built by
@@ -1053,7 +1053,7 @@ export interface ScenarioCompareResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Closed-loop outcome, verification, and evaluation (Phase 12)
+// Closed-loop outcome, verification, and evaluation
 // ---------------------------------------------------------------------------
 
 export type OutcomeType = "maintenance_event" | "operational_event" | "inspection_result" | "failure_event" | "recovery_event" | "other";

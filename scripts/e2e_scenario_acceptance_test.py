@@ -1,4 +1,4 @@
-"""Phase 11 — Live end-to-end acceptance test for Scenario Simulation /
+"""Live end-to-end acceptance test for Scenario Simulation
 What-If Analysis.
 
 THIS IS SCENARIO ANALYSIS, NOT A PHYSICAL DIGITAL TWIN — see
@@ -202,7 +202,7 @@ check(len(sweep_results["sensitivity"]["points"]) == 3, f"one point per tested m
 check("no trend line is fit" in sweep_results["sensitivity"]["note"].lower(), "sweep note explicitly disclaims fitting a trend")
 
 r = client.post(f"/api/v1/scenarios/{scenario['id']}/sensitivity", headers=H, json={"magnitudes": [float(i) for i in range(1, 10)]})
-check(r.status_code == 422, f"a sweep beyond the 8-point bound (§17) is rejected -> {r.status_code}")
+check(r.status_code == 422, f"a sweep beyond the 8-point bound is rejected -> {r.status_code}")
 
 # ---------------------------------------------------------------------------
 step("6. MULTI-RUN COMPARISON — real per-run results side by side, no combined score")

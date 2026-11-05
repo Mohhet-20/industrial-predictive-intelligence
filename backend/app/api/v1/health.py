@@ -19,7 +19,7 @@ def liveness() -> dict:
 def readiness(db: Session = Depends(get_db)) -> dict:
     """Readiness: can the app actually serve requests right now? Checks the
     one real critical dependency this foundation has — the database — with
-    a cheap `SELECT 1`, not an expensive query or an ML operation (the spec
+    a cheap `SELECT 1`, not an expensive query or an ML operation (the design
     is explicit that health checks must never do model loading/inference).
     Also reports the applied Alembic schema revision as a non-blocking
     diagnostic: a mismatch between this and the revision the running code

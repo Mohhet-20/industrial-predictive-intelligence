@@ -1,4 +1,4 @@
-"""Closed-loop feedback domain logic (Phase 12).
+"""Closed-loop feedback domain logic.
 
 This package holds the pure, deterministic logic that sits underneath
 `app.services.feedback_service`. Each module is deliberately narrow and
@@ -16,7 +16,7 @@ Sub-modules:
   of every verification status, signal assessment, and classification rule
   this platform uses. Exists so "what does VERIFIED mean" or "what counts as
   a false positive here" is a documented, API-exposed answer rather than
-  something only readable in code (Phase 12 §18, label governance).
+  something only readable in code (label governance).
 - `metrics` — classification of outcome-signal links into true
   positive/false positive/unresolved buckets, and precision-only metric
   computation gated on a minimum verified-link sample size. Deliberately
@@ -25,7 +25,7 @@ Sub-modules:
 - `error_analysis` — late-detection, duplicate-candidate, and
   false-negative-candidate detection. Everything here is framed as a
   *candidate* for human review, never an automatic root-cause conclusion
-  (Phase 12 §9/§15).
+ .
 
 Nothing in this package talks to synthetic or scenario ground truth — that
 is `app.anomaly.evaluation` / `app.anomaly.synthetic_scenarios`, a completely

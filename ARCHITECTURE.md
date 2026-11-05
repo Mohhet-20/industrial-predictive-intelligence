@@ -1,15 +1,14 @@
 # Architecture — Industrial AI Predictive Intelligence Platform
 
-Status: **Phase 1 — Foundation**, extended (not rewritten here) through
-Phase 9. This document still accurately describes what it describes — the
-domain model, module boundaries, and technology choices from Phase 1 — but
-is a snapshot, not a living diagram; each later phase's own doc covers
+This document describes the
+domain model, module boundaries, and technology choices. It
+is a snapshot, not a living diagram; each layer's own doc covers
 what it added rather than retrofitting this one (see README.md for the
-full phase-by-phase map). In particular: §7 (Security) and §8
-(Observability) below describe the Phase 1 foundation only —
+full map). In particular: §7 (Security) and §8
+(Observability) below describe the foundation only —
 docs/RELIABILITY_AND_OPERATIONS.md §1–§13 is the current, complete account
 of this system's deployment architecture, security hardening, and
-observability as of Phase 7, and docs/SECURITY_AND_PRIVACY.md is the
+observability, and docs/SECURITY_AND_PRIVACY.md is the
 readable summary. Sections marked PLANNED are not built. For real Mermaid
 diagrams of the actual system architecture, data flow, intelligence flow,
 provenance flow, and domain model, see
@@ -22,7 +21,7 @@ replacement for it), see [docs/COPILOT.md](./docs/COPILOT.md).
 ## 0. Repository audit (what this was built against)
 
 The workspace (`F:\pred`, mounted here as the project root) was empty before
-this phase. There was no existing stack, dataset, or convention to preserve.
+this layer. There was no existing stack, dataset, or convention to preserve.
 The stack below was chosen fresh, using the constraints in the project brief
 (strong typing, testability, reproducibility, no unjustified infrastructure).
 
@@ -33,7 +32,7 @@ ingest → validate → store → explore → assess data quality, as a trustwor
 foundation for anomaly detection and predictive maintenance work in later
 phases. It is decision support. It does not control equipment and does not
 issue autonomous maintenance actions — every AI-derived output in this and
-future phases is reviewable evidence for a human, not a command.
+later work is reviewable evidence for a human, not a command.
 
 ## 2. Domain model
 
@@ -50,7 +49,7 @@ Organization
   └─ BackgroundJob (async unit of work: status/progress/result/error)
   └─ ModelVersion / ModelRun / Prediction / Anomaly / AnomalyInvestigation
        (PLANNED — tables exist so the schema doesn't need breaking migrations
-        later, but no training, scoring, or detection logic runs in Phase 1.
+        later, but no training, scoring, or detection logic runs.
         Every API that would surface them returns an explicit "not yet
         available" response rather than fabricated numbers.)
 ```
@@ -98,9 +97,9 @@ into the backend's database.
 | Styling | Tailwind CSS | fast to keep visually consistent without a component library dependency |
 
 Nothing here was added speculatively; each row is used by something built
-in this phase.
+in this layer.
 
-## 5. Data flow (the one workflow this phase proves end-to-end)
+## 5. Data flow (the one workflow proven end-to-end)
 
 ```
 synthetic generator (seeded)
@@ -159,11 +158,11 @@ completion report, "known limitations").
 - `BackgroundJob` rows give real status/progress/error for async work — the
   System Health page reads this, it does not fabricate metrics.
 
-## 9. What is explicitly NOT in this phase
+## 9. What is explicitly NOT
 
 Anomaly detection, feature engineering pipelines, model training/scoring,
 explainability, and predictive maintenance risk are **PLANNED**. Their
-tables exist (so later phases are additive migrations, not rewrites) and
+tables exist (so later work are additive migrations, not rewrites) and
 their frontend page exists as a clearly-labeled "not yet available"
 placeholder, but no detection or prediction logic runs anywhere in this
 codebase yet. Nothing in the API or UI claims a prediction that doesn't

@@ -1,4 +1,4 @@
-"""Pydantic schemas for the Intelligence Orchestration API (Phase 6).
+"""Pydantic schemas for the Intelligence Orchestration API.
 
 Every one of these endpoints returns a genuinely variable-shaped
 aggregation (a timeline mixes several event kinds, a prioritization list's

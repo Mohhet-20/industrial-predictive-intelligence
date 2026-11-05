@@ -1,4 +1,4 @@
-"""Deterministic suggested questions (Phase 9 §5). Not LLM-generated —
+"""Deterministic suggested questions. Not LLM-generated —
 a fixed, hand-written list per context type, filtered by nothing but the
 context type itself. This is intentional: suggested questions are a UX
 affordance to show the copilot's actual scope, not a place to introduce

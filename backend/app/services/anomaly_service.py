@@ -580,7 +580,7 @@ def list_anomaly_investigations(db: Session, *, organization_id: str, anomaly_id
 # Synthetic scenario evaluation (spec section 12/13) — pipeline-correctness
 # validation against deterministic, seeded, code-defined ground truth. This
 # is NEVER a claim about real-world detection accuracy: no labeled fault
-# data exists for this platform (see docs/SYNTHETIC_DATA.md from Phase 1).
+# data exists for this platform (see docs/SYNTHETIC_DATA.md).
 # Every result here carries is_synthetic=True at every level, and the
 # aggregate stored on ModelVersion.evaluation_results is labeled the same
 # way (see docs/ANOMALY_DETECTION.md for how this should and shouldn't be

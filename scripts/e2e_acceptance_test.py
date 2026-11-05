@@ -1,9 +1,9 @@
-"""Phase 8 §16 — Final end-to-end flagship acceptance test.
+"""Final end-to-end flagship acceptance test.
 
 Runs the REAL application (FastAPI TestClient wrapping the actual app,
 same middleware/auth/service/DB stack a real HTTP client would hit)
 against the REAL seeded dev database (backend/data/pred_platform.db,
-the same org used by every prior phase's live validation). Nothing here
+the same org used by each layer's live validation). Nothing here
 is mocked or simulated — every step is a real HTTP call through real
 application code, and every printed result is the real response.
 
@@ -14,8 +14,8 @@ Usage (requires the demo dataset to already be loaded — see SETUP.md):
     python ../scripts/e2e_acceptance_test.py
 
 Exits non-zero if any check fails. Real output from the most recent run
-is quoted in docs/RELIABILITY_AND_OPERATIONS.md's Phase 8 addendum and
-the Phase 8 completion report.
+is quoted in docs/RELIABILITY_AND_OPERATIONS.md's addendum and
+the completion report.
 """
 import json
 import os
@@ -39,7 +39,7 @@ client = TestClient(app, raise_server_exceptions=False)
 # calls the client directly, module-style, so it registers job handlers
 # explicitly here rather than relying on a lifespan event that would
 # otherwise silently never run — the same fix already applied in
-# e2e_scenario_acceptance_test.py (Phase 11), ported here because this
+# e2e_scenario_acceptance_test.py, ported here because this
 # script predates it and step 5 below can cross into the background-job
 # size threshold for anomaly detection runs, which previously failed with
 # "No handler registered for job type 'anomaly_detection_run'."
@@ -254,7 +254,7 @@ if first_ts and last_ts:
 step("9. OPEN THE UNIFIED INVESTIGATION EXPERIENCE")
 r = client.post("/api/v1/investigations", headers=H, json={
     "asset_id": asset["id"],
-    "title": "Phase 8 acceptance test — bearing temp anomaly review",
+    "title": "Acceptance test — bearing temp anomaly review",
     "description": "Opened by the final flagship acceptance test to exercise the real investigation workflow end to end.",
     "primary_sensor_id": sensor["id"],
 })

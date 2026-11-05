@@ -1,5 +1,5 @@
 """Closed-loop outcome, verification, evaluation, and feedback API
-(Phase 12). Two routers:
+. Two routers:
 
 - `router` (/outcomes) — reporting, verification, and signal linking.
 - `feedback_router` (/feedback) — evaluation runs, error analysis,

@@ -1,12 +1,12 @@
-# Intelligence Orchestration, Unified Investigation & Evidence-Based Decision Support (Phase 6)
+# Intelligence Orchestration, Unified Investigation & Evidence-Based Decision Support
 
-This document describes what Phase 6 actually built on top of Phases
+This document describes what actually built on top of Phases
 1–5: an organizational layer that connects the real evidence those
 phases produce, preserves its provenance, surfaces relevant context, and
 helps a human prioritize investigation — without inventing a health
 score, a probability of failure, or a cause. As with every layer before
 it, this document starts from a fresh, repository-verified capability
-audit (§0), not from what earlier phases *planned* to build.
+audit (§0), not from what earlier work *planned* to build.
 
 **Core principle, repeated because it governs every design choice below:**
 this platform connects evidence, preserves provenance, surfaces context,
@@ -15,7 +15,7 @@ failure probability, and does not decide anything for the user.
 
 ## §0 — Capability audit
 
-Re-inspected the entire repository (not assumed from the Phase 1–5
+Re-inspected the entire repository (not assumed
 completion reports) before writing any orchestration code. What actually
 exists, and what state it's in:
 
@@ -30,20 +30,20 @@ exists, and what state it's in:
 | Anomaly explanations | AVAILABLE AND VALIDATED | `Anomaly.contributing_signals`, `get_anomaly_context` |
 | Condition (degradation) signals | AVAILABLE AND VALIDATED, heuristic — not a trained model | `app.models.condition.DegradationSignal`, `app.condition.degradation` |
 | Forecasts | AVAILABLE BUT LIMITED — only where a real backtest justifies it; usually not justified on this platform's actual data | `app.models.condition.ForecastModel/ForecastRun` |
-| Predictive (failure) models | NOT AVAILABLE — no failure/maintenance labels exist anywhere in this schema (re-confirmed, third time, following Phases 4 and 5's own audits) | — |
+| Predictive (failure) models | NOT AVAILABLE — no failure/maintenance labels exist anywhere in this schema (re-confirmed, third time, following and 5's own audits) | — |
 | Human reviews | AVAILABLE AND VALIDATED | `AnomalyInvestigation`, `DegradationReview` |
-| Model/component versions & lifecycle | AVAILABLE AND VALIDATED | `app.models.mlops.*` (Phase 5) |
+| Model/component versions & lifecycle | AVAILABLE AND VALIDATED | `app.models.mlops.*` |
 | Experiment/run tracking | AVAILABLE BUT LIMITED — `ModelRun`/`ForecastRun`/`ConditionRun` exist; no hyperparameter-sweep or multi-run comparison tooling, because nothing in this codebase needs one (Isolation Forest has one fixed, documented configuration) | `app.models.intelligence.ModelRun`, `app.models.condition.ConditionRun/ForecastRun` |
 | Monitoring signals | AVAILABLE AND VALIDATED, split OPERATIONAL/DATA/MODEL_PERFORMANCE | `anomaly_service.get_monitoring_summary`, `condition_service.get_condition_monitoring_summary`, `mlops_service.get_mlops_monitoring_summary` |
-| Shift analysis | AVAILABLE AND VALIDATED, discrete/on-demand only | `app.models.mlops.ShiftAnalysisRun` (Phase 5) |
-| Background jobs | AVAILABLE BUT LIMITED — real job runner exists; `JobType.DETECTOR_TRAINING` is declared but was never wired to a handler (found in Phase 5's audit, re-confirmed here) | `app.jobs.*` |
+| Shift analysis | AVAILABLE AND VALIDATED, discrete/on-demand only | `app.models.mlops.ShiftAnalysisRun` |
+| Background jobs | AVAILABLE BUT LIMITED — real job runner exists; `JobType.DETECTOR_TRAINING` is declared but was never wired to a handler (found in the audit, re-confirmed here) | `app.jobs.*` |
 | Authentication/authorization | AVAILABLE AND VALIDATED | `app.core.deps`, JWT + RBAC |
 
-One existing decision-support mechanism already implemented in Phase 4,
+One existing decision-support mechanism already implemented,
 `condition_service.get_attention_list`, is NOT duplicated here — it
 remains exactly as it was (a simple `(stage_rank, severity_rank,
 period_start)` ordering combining open anomalies and degradation
-signals). This phase's `orchestration_service.get_prioritized_signals`
+signals). This layer's `orchestration_service.get_prioritized_signals`
 is a richer, separately-versioned ranking that adds persistence,
 cross-detector agreement, and data-quality context — see §4.
 
@@ -66,7 +66,7 @@ the new `investigation_*` tables.
 
 `InvestigationRelation` implements "related investigations where
 appropriate" as an explicit, human-asserted, symmetric-in-the-API link
-(see the self-review bug fixed in §20).
+(see the bug fixed in §20).
 
 ## §2 — Evidence graph / relationship model
 
@@ -99,7 +99,7 @@ degradation signals and their reviews, forecast runs on the asset's
 sensors, component lifecycle events (activation/rollback/retirement) for
 components covering the asset's sensors, and investigation
 open/status-change/annotation events. Every event is tagged with one of
-**five** categories — the spec's four (OBSERVED DATA / ANALYTICAL SIGNAL /
+**five** categories — the design's four (OBSERVED DATA ANALYTICAL SIGNAL
 MODEL OUTPUT / HUMAN INTERPRETATION) plus a fifth, GOVERNANCE, added
 because a component activation/rollback/retirement event is neither raw
 data, a statistical signal, a model's output, nor a human's
@@ -109,7 +109,7 @@ misrepresent what it is; the fifth category is documented rather than
 hidden.
 
 Raw measurements and change candidates are deliberately excluded from the
-timeline: raw measurements would overwhelm it (the spec explicitly warns
+timeline: raw measurements would overwhelm it (the design explicitly warns
 against this), and change candidates have no stored, time-range-queryable
 row to aggregate in bulk across a whole asset (see §2). Both remain fully
 explorable per-sensor via Temporal Analysis.
@@ -138,7 +138,7 @@ Isolation Forest), and agreement between them is real corroborating
 evidence, not an invented signal.
 `nearby_data_quality_issue_count` is surfaced as context, not scored —
 there is no validated basis for a specific penalty weight, the same
-honesty this platform applied to not implementing PSI in Phase 5's shift
+honesty this platform applied to not implementing PSI in the shift
 analysis (see `docs/MLOPS_GOVERNANCE.md` §12). The methodology and its
 version (`orchestration_priority_v1`) are returned in every response, not
 hidden inside the number.
@@ -177,13 +177,13 @@ default (what happened, when, which method, governance status) with a
 (raw config, feature schema, evaluation results, baseline summary) —
 progressive disclosure, not a wall of JSON by default. Every anomaly
 already carries `contributing_signals` and `data_quality_context` from
-Phase 3; every degradation signal already carries its full `evidence`
-bundle from Phase 4 — this panel surfaces those real fields rather than
+the anomaly layer; every degradation signal already carries its full `evidence`
+bundle — this panel surfaces those real fields rather than
 re-deriving them.
 
 ## §8 — Contextual cross-sensor investigation
 
-`orchestration_service.get_cross_sensor_context` reuses Phase 2's real
+`orchestration_service.get_cross_sensor_context` reuses the real
 `app.timeseries.multi_sensor` correlation machinery, overlaid with real
 open anomaly/degradation-signal counts per sensor in the requested
 window. Language is deliberately non-causal throughout: `observed_associations`
@@ -200,9 +200,9 @@ resolutions, false-positive assessments, and follow-up flags — append-
 only, never edited or deleted. This platform deliberately keeps four
 concepts distinct and implements only the first three:
 
-1. **Raw data** — `SensorMeasurement` (Phase 1).
-2. **ML/statistical outputs** — `Anomaly`, `DegradationSignal`, `ForecastRun` (Phases 3–4).
-3. **Human annotations** — `InvestigationAnnotation` (this phase) — a person's *stated interpretation*, nothing more.
+1. **Raw data** — `SensorMeasurement`.
+2. **ML/statistical outputs** — `Anomaly`, `DegradationSignal`, `ForecastRun`.
+3. **Human annotations** — `InvestigationAnnotation` — a person's *stated interpretation*, nothing more.
 4. **Verified outcomes** — **NOT IMPLEMENTED.** This platform has no
    workflow that promotes a human annotation into a verified training
    label, and it does not pretend otherwise. Recording a
@@ -233,12 +233,12 @@ value.
 
 ## §11 — Model and method provenance in user workflows
 
-`get_evidence_provenance` implements the full chain the spec asks for —
+`get_evidence_provenance` implements the full chain the design asks for —
 Signal → Method/Detector/Model → Version → Configuration → Feature/Data
 Definition → Training/Reference Context → Evaluation Evidence — for the
 two evidence kinds that actually have one: `anomaly` (through
 `ModelRun` → `ModelVersion` → optionally a registered
-`ComponentVersion`/`IntelligenceComponent`, Phase 5's governance layer)
+`ComponentVersion`/`IntelligenceComponent`, the governance layer)
 and `degradation_signal` (through `ConditionRun` → the heuristic
 classification method, which has no per-signal linking id at all — see
 below). Returned as two levels (`summary`, `technical`) for progressive
@@ -246,7 +246,7 @@ disclosure (§7).
 
 **Honestly documented traceability gap:** a `DegradationSignal` cannot be
 programmatically traced to a specific registered `ComponentVersion`,
-because `ComponentVersion.heuristic_code_version` (Phase 5) is a
+because `ComponentVersion.heuristic_code_version` is a
 free-text label a human types when registering a heuristic version, not a
 foreign key with any link back to the signals a given code version
 produced. This is a real, structural limitation of the current schema,
@@ -269,17 +269,17 @@ endpoints bounded and paginated:
 - `app/api/v1/orchestration.py` (`/orchestration/*`) — entirely read-only
   (timeline, prioritized-signals, asset summary, cross-sensor-context,
   evidence provenance). No route here can write anything; it only reads
-  Phases 1–5's real tables and this phase's own investigation tables.
+  5's real tables and its own investigation tables.
 
 No route returns an internal object, a raw pandas structure, or anything
 beyond the JSON-serializable fields the schemas declare (same discipline
-as every prior phase's API layer).
+as each layer's API layer).
 
 ## §13 — Frontend: flagship intelligence experience
 
 `frontend/src/pages/IntelligenceWorkspacePage.tsx`, wired in as
 "Intelligence Workspace" (route `/workspace`), implements the exact
-journey the spec asks for in one integrated page rather than another
+journey the design asks for in one integrated page rather than another
 disconnected dashboard: prioritized items → select asset → cross-layer
 summary → timeline → open/select investigation → evidence (with
 provenance trace) → human context (annotations) → status. Cross-sensor
@@ -292,7 +292,7 @@ evidence they're looking at.
 
 **Known frontend scope gap:** removing an evidence link has a backend
 route (`DELETE /investigations/{id}/evidence/{link_id}`) but no frontend
-button in this pass — attaching evidence is the primary workflow the spec
+button in this pass — attaching evidence is the primary workflow the design
 emphasizes, and removal was deprioritized rather than rushed. Documented
 here rather than silently left out.
 
@@ -303,7 +303,7 @@ explicitly: zero open signals (`EmptyState` in the UI, not a fabricated
 "all clear" score), zero sensors on an asset (`sensor_count: 0` plus a
 limitation string, not silently omitted), no justified forecast (a
 limitation string, never a forecast pretending otherwise), insufficient
-data for cross-sensor correlation (the underlying Phase 2 machinery's
+data for cross-sensor correlation (the underlying machinery's
 existing `TooManyObservationsError`/insufficient-data handling propagates
 unchanged), and no governance registration for a detector
 (`governance_status: "not registered..."`, not a blank or a guess).
@@ -313,7 +313,7 @@ explicitly (see §17/§19).
 ## §15 — Performance & caching
 
 Every orchestration read is a bounded query (§3's per-source cap, §4's
-500-row cap mirroring Phase 4's existing pattern) — no unbounded table
+500-row cap mirroring the existing pattern) — no unbounded table
 scan exists anywhere in this layer. **No caching layer was added.**
 This is a deliberate, documented scope decision, not an oversight: at
 this platform's actual data volumes (a synthetic demo organization with a
@@ -326,7 +326,7 @@ that calculus, `get_asset_intelligence_summary` is the first candidate
 for a precomputed/cached version — it aggregates the most sources — and
 would need explicit invalidation on every write to `Anomaly`,
 `DegradationSignal`, `DataQualityIssue`, `ForecastRun`, and `Investigation`
-to stay honest, which is precisely the complexity this phase chose not
+to stay honest, which is precisely the complexity this design chose not
 to take on without a measured need.
 
 ## §16 — Security & auditability
@@ -375,12 +375,12 @@ organization-scoping; asset-summary category separation with correct
 limitation strings; asset-summary honesty with zero sensors; asset-summary
 404; cross-sensor-context sensor-count/same-asset validation; cross-sensor
 non-causal language; anomaly provenance with and without governance
-registration (proving the Phase 5 registry integration is real, not
+registration (proving the registry integration is real, not
 guessed); degradation-signal provenance; provenance for an unsupported
 evidence type and a nonexistent id; and both authentication and viewer-
 role read-access checks on the orchestration router.
 
-All 247 backend tests pass (216 carried over from Phases 1–5 + 13 new in
+All 247 backend tests pass (216 carried over + 13 new in
 `test_api_investigations.py` + 18 new in `test_api_orchestration.py` = 247);
 see §21 for the exact validation-gate run that confirms this.
 
@@ -388,7 +388,7 @@ see §21 for the exact validation-gate run that confirms this.
 
 This document. Cross-referenced from `README.md`'s architecture-reference
 paragraph and Status section, following the exact pattern
-`docs/MLOPS_GOVERNANCE.md` established for Phase 5. Only capabilities
+`docs/MLOPS_GOVERNANCE.md` established. Only capabilities
 that actually exist and were actually run are described above — the
 capability-audit table in §0 states plainly which pieces are limited or
 unavailable rather than omitting them.
@@ -399,8 +399,8 @@ Beyond the 31 API-level tests, a live validation script
 (`live_validate_orchestration.py`, run directly against the real
 `backend/data/pred_platform.db` dev database — the same one the seeded
 Riverbend Manufacturing demo org has been accumulating real data and real
-Phase 3/4/5 activity in across this whole project) exercised the exact
-workflow the spec's stop condition names, using the real service-layer
+activity across this whole project) exercised the exact
+workflow the acceptance criteria names, using the real service-layer
 functions the API itself calls, with real observed results (not
 predetermined):
 
@@ -422,7 +422,7 @@ predetermined):
    `get_asset_intelligence_timeline` returned 14 real events spanning
    **four of the five documented categories** in one call
    (`observed_data`, `model_output`, `human_interpretation`, and
-   `governance` — the governance events came from Phase 5's real
+   `governance` — the governance events came from the real
    component-activation history on this same sensor, concretely proving
    the cross-phase integration in §3 is real, not aspirational).
 5. Attached the real anomaly to the investigation as evidence by
@@ -432,7 +432,7 @@ predetermined):
    and version (`bearing-temp-de-orchestration-live v1`), and an honest
    `governance_status: "not registered in the intelligence lifecycle
    registry"` — correct, because this particular detector was never
-   registered in Phase 5's registry, and the function said so instead of
+   registered in the registry, and the function said so instead of
    guessing.
 7. Added a real human annotation (`observation` type) and confirmed the
    real asset summary's `unreviewed_anomaly_count` was unaffected by it
@@ -456,7 +456,7 @@ not staged for the demo. See §21 for the exact test run that backs this
 
 ## §20 — Principal AI systems review
 
-Self-review questions from the spec, answered honestly:
+Design review questions, answered honestly:
 
 - **Does the platform feel like one cohesive system?** More than before:
   one workspace page now connects prioritization, an asset's full
@@ -476,14 +476,14 @@ Self-review questions from the spec, answered honestly:
 - **Is prioritization transparent?** Yes — every score's formula and
   factors are returned in the response itself (§4).
 - **Are anomalies still clearly distinguished from failures?** Yes —
-  no field, label, or UI element in this phase's additions claims a
+  no field, label, or UI element in these additions claims a
   failure, a diagnosis, or a probability of one.
 - **Does the system handle insufficient evidence honestly?** Yes (§14).
 - **Can users efficiently investigate an issue?** The workspace's single
   page removes the prior need to manually cross-reference asset id,
   sensor id, and time window across separate pages.
 - **Are synthetic capabilities clearly labeled?** Yes — the same
-  `is_synthetic_scenario` labeling from Phase 3 flows through unchanged
+  `is_synthetic_scenario` labeling flows through unchanged
   wherever this layer surfaces anomaly evidence.
 - **Is the architecture unnecessarily complex?** No new database
   paradigm was introduced (§2); the registry layering pattern from Phase
@@ -515,21 +515,21 @@ Run in this session, in this order, against the real repository:
    detected exactly six additive table/index operations, zero drops.
 2. `alembic upgrade head` → applied cleanly.
 3. `alembic check` → "No new upgrade operations detected."
-4. `.venv/bin/python3 -m pytest -q` (full suite, before this phase's new
-   tests) → 216 passed (Phases 1–5's carried-over suite, unaffected).
+4. `.venv/bin/python3 -m pytest -q` (full suite, before the new
+   tests) → 216 passed (the carried-over suite, unaffected).
 5. New test files written and run individually during development,
    fixing two real test-authoring mistakes along the way (a fabricated
    nonexistent sensor id in a snapshot payload, and a malformed boolean
    assertion) — both fixed in the test code, not by weakening the
    assertion's intent.
-6. **The self-review bug (§20) found, fixed, and covered by a new
+6. **The review bug (§20) found, fixed, and covered by a new
    regression test** before the final run.
 7. `.venv/bin/python3 -m pytest -q` (full suite, final) → **247 passed**
    (216 carried over + 13 new investigation tests + 18 new orchestration
    tests).
 8. `npm run build` (`tsc -b && vite build`) → succeeded with zero
    TypeScript errors, one pre-existing informational chunk-size warning
-   (present before this phase too).
+   (present beforehand too).
 
 No test was skipped, no failure was silently reinterpreted as a pass, and
 nothing above is claimed without having actually been run in this
@@ -547,4 +547,4 @@ an LLM-generated narrative summary (§10's summaries are template-filled
 from real counted evidence, not generated text), or a verification/
 outcome-labeling workflow (§9) — building any of these without a real,
 measured need would be exactly the kind of unearned complexity this
-project's stop conditions have consistently rejected.
+project's acceptance criteria have consistently rejected.

@@ -152,7 +152,7 @@ class TestEvaluationRunLeakageCheck:
         assert "now" not in params
 
     # -----------------------------------------------------------------
-    # outcome_reported_at (Phase 15 Phase I) — a backdated outcome_timestamp
+    # outcome_reported_at — a backdated outcome_timestamp
     # inside the evaluation period is NOT by itself proof this platform knew
     # about the outcome in time; the report itself (created_at) must also
     # predate computed_at.

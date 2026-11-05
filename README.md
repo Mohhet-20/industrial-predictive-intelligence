@@ -27,12 +27,6 @@ human investigation, not a confirmed fault. Every degradation signal is a
 candidate for engineering judgment, not a confirmed failure. Nothing here
 activates or retrains itself, and nothing here controls equipment.
 
-Built in 16 phases, each starting with an audit of what actually existed
-before adding anything new. The phase-by-phase record is in
-[docs/history/BUILD_HISTORY.md](./docs/history/BUILD_HISTORY.md), and
-[docs/PORTFOLIO_NARRATIVE.md](./docs/PORTFOLIO_NARRATIVE.md) has the short
-version of why that discipline mattered more than feature count.
-
 ---
 
 ![Anomaly intelligence: a robust z-score detector trained on stored history flags a candidate anomaly](./docs/screenshots/03-anomaly-intelligence.png)
@@ -67,7 +61,7 @@ chronological/rolling/expanding time-aware dataset splitting; multi-sensor
 correlation (labeled association, never causation).
 
 **Anomaly detection**
-Robust z-score, Isolation Forest, and (Phase 14) Mahalanobis/robust-
+Robust z-score, Isolation Forest, and Mahalanobis/robust-
 covariance detectors, chosen for complementary strengths — the third
 catches a point where every sensor looks individually normal but the
 *relationship* between sensors has broken down, a case proven (not just
@@ -129,7 +123,7 @@ frontend (React/TypeScript SPA), SQLite for storage — deliberately, not by
 oversight (see [ARCHITECTURE.md](./ARCHITECTURE.md) §6). No message
 broker, no cache; the background job runner is asyncio tasks inside the
 same process as the API. The one optional exception to "no third-party API
-call" is the AI copilot (Phase 9): when `ANTHROPIC_API_KEY` is set, it
+call" is the AI copilot: when `ANTHROPIC_API_KEY` is set, it
 makes a real outbound call to Anthropic's Messages API — with no key
 configured (the default), the copilot runs entirely without one and this
 statement holds exactly as before. See
@@ -282,8 +276,7 @@ Coverage spans ingestion validation, temporal-leakage prevention, feature contra
 condition/forecasting, MLOps lifecycle transitions, investigation workflows, authorization boundaries,
 background-job failure handling, and a fault-injection suite (broken DB dependency, hung jobs, oversized
 requests, repeated login failures); see
-[docs/RELIABILITY_AND_OPERATIONS.md](./docs/RELIABILITY_AND_OPERATIONS.md) §15/§19. Earlier per-phase results are
-in [docs/history/BUILD_HISTORY.md](./docs/history/BUILD_HISTORY.md).
+[docs/RELIABILITY_AND_OPERATIONS.md](./docs/RELIABILITY_AND_OPERATIONS.md) §15/§19.
 
 ## Project structure
 
@@ -302,7 +295,7 @@ backend/
     condition/  degradation classification, evidence, forecasting
     synthetic/  deterministic synthetic data generator
     copilot/    evidence tools, grounding/hallucination safeguard, LLM
-                provider abstraction, orchestration (Phase 9, optional)
+                provider abstraction, orchestration (optional)
   alembic/      migrations (purely additive throughout this project's history)
   tests/        301 tests
 frontend/
@@ -324,21 +317,20 @@ scripts/        ci_check.sh — the real, runnable validation gate
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Domain model, module boundaries, technology decisions |
 | [docs/ARCHITECTURE_DIAGRAMS.md](./docs/ARCHITECTURE_DIAGRAMS.md) | Real Mermaid diagrams — system, data flow, intelligence flow, provenance, domain model |
 | [docs/AI_ML_METHODOLOGY.md](./docs/AI_ML_METHODOLOGY.md) | Consolidated ML methodology, evaluation, limitations |
-| [docs/TEMPORAL_INTELLIGENCE.md](./docs/TEMPORAL_INTELLIGENCE.md) | Time-series profiling/feature/dataset-builder layer (Phase 2) |
-| [docs/ANOMALY_DETECTION.md](./docs/ANOMALY_DETECTION.md) | Anomaly detection, evaluation, investigation layer (Phase 3) |
-| [docs/CONDITION_INTELLIGENCE.md](./docs/CONDITION_INTELLIGENCE.md) | Condition, degradation, forecasting layer (Phase 4) |
-| [docs/MLOPS_GOVERNANCE.md](./docs/MLOPS_GOVERNANCE.md) | Lifecycle, registry, governance layer (Phase 5) |
-| [docs/INTELLIGENCE_ORCHESTRATION.md](./docs/INTELLIGENCE_ORCHESTRATION.md) | Investigation, evidence-graph, timeline layer (Phase 6) |
-| [docs/RELIABILITY_AND_OPERATIONS.md](./docs/RELIABILITY_AND_OPERATIONS.md) | Deployment, config, health, security hardening, CI (Phase 7) |
+| [docs/TEMPORAL_INTELLIGENCE.md](./docs/TEMPORAL_INTELLIGENCE.md) | Time-series profiling/feature/dataset-builder layer |
+| [docs/ANOMALY_DETECTION.md](./docs/ANOMALY_DETECTION.md) | Anomaly detection, evaluation, investigation layer |
+| [docs/CONDITION_INTELLIGENCE.md](./docs/CONDITION_INTELLIGENCE.md) | Condition, degradation, forecasting layer |
+| [docs/MLOPS_GOVERNANCE.md](./docs/MLOPS_GOVERNANCE.md) | Lifecycle, registry, governance layer |
+| [docs/INTELLIGENCE_ORCHESTRATION.md](./docs/INTELLIGENCE_ORCHESTRATION.md) | Investigation, evidence-graph, timeline layer |
+| [docs/RELIABILITY_AND_OPERATIONS.md](./docs/RELIABILITY_AND_OPERATIONS.md) | Deployment, config, health, security hardening, CI |
 | [docs/SECURITY_AND_PRIVACY.md](./docs/SECURITY_AND_PRIVACY.md) | Readable security/privacy summary |
 | [docs/API_GUIDE.md](./docs/API_GUIDE.md) | Auth, pagination, error shape, endpoint map, real workflow example |
-| [docs/COPILOT.md](./docs/COPILOT.md) | AI copilot architecture, grounding/hallucination protection, provider abstraction, honest scope (Phase 9, optional) |
-| [docs/SCIENTIFIC_VALIDATION.md](./docs/SCIENTIFIC_VALIDATION.md) | Evaluation methodology, reproducible results, adversarial/failure-case testing, known limitations (Phase 10) |
-| [docs/SCENARIO_SIMULATION.md](./docs/SCENARIO_SIMULATION.md) | Non-destructive what-if scenario analysis — never a physical digital twin (Phase 11) |
-| [docs/CLOSED_LOOP_FEEDBACK.md](./docs/CLOSED_LOOP_FEEDBACK.md) | Outcome verification, governed retraining candidates, leakage-safe feedback loop (Phase 12) |
+| [docs/COPILOT.md](./docs/COPILOT.md) | AI copilot architecture, grounding/hallucination protection, provider abstraction, honest scope (optional) |
+| [docs/SCIENTIFIC_VALIDATION.md](./docs/SCIENTIFIC_VALIDATION.md) | Evaluation methodology, reproducible results, adversarial/failure-case testing, known limitations |
+| [docs/SCENARIO_SIMULATION.md](./docs/SCENARIO_SIMULATION.md) | Non-destructive what-if scenario analysis — never a physical digital twin |
+| [docs/CLOSED_LOOP_FEEDBACK.md](./docs/CLOSED_LOOP_FEEDBACK.md) | Outcome verification, governed retraining candidates, leakage-safe feedback loop |
 | [docs/INGESTION_CONTRACT.md](./docs/INGESTION_CONTRACT.md) | Exact ingestion validation rules |
 | [docs/SYNTHETIC_DATA.md](./docs/SYNTHETIC_DATA.md) | What the demo dataset is and isn't |
-| [docs/PORTFOLIO_NARRATIVE.md](./docs/PORTFOLIO_NARRATIVE.md) | Elevator pitch, technical walkthrough, demo script |
 | [SETUP.md](./SETUP.md) | Local setup, troubleshooting, Docker/Compose path |
 
 ## Known limitations
@@ -382,7 +374,7 @@ Stated plainly, not hidden:
 **Not implemented, and not planned as an extension of this project's
 current scope** — building any of these without the missing prerequisite
 (usually: real labeled outcome data) would violate this project's own
-stop conditions:
+acceptance criteria:
 - Supervised failure prediction / remaining-useful-life estimation
 - A model artifact store, a message-broker-backed job queue, true
   zero-downtime hot deployment, continuous automated drift scoring

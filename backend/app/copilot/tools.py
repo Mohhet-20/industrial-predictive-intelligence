@@ -1,4 +1,4 @@
-"""Narrow, validated evidence-retrieval tools (Phase 9 §2/§3).
+"""Narrow, validated evidence-retrieval tools.
 
 Every function here is the ONLY way the copilot orchestrator touches the
 database — the LLM never sees a connection string, never gets to run
@@ -23,7 +23,7 @@ This is deliberately a STRUCTURED retrieval layer, not a vector-search
 layer — every source here (assets, anomalies, investigations...) is
 already relational data with a real id and real filters, so a keyword/
 vector index would add complexity without solving a problem structured
-queries don't already solve better (Phase 9 §2). Documentation search
+queries don't already solve better. Documentation search
 (`search_documentation`) is the one source that's genuinely unstructured
 text, and it uses plain keyword matching over the repository's own
 markdown docs — good enough at 13 short documents, and honestly not
@@ -210,7 +210,7 @@ def get_anomaly_evidence(db: Session, *, organization_id: str, anomaly_id: str) 
 
 
 # ---------------------------------------------------------------------------
-# Closed-loop outcome/evaluation evidence (Phase 12). Every item below
+# Closed-loop outcome/evaluation evidence. Every item below
 # must distinguish a human REPORT from a human VERIFICATION — an unverified
 # outcome is surfaced, but always labeled as such, never presented as
 # confirmed ground truth. Nothing here ever infers a conclusion the
@@ -454,7 +454,7 @@ def get_investigation_timeline(db: Session, *, organization_id: str, investigati
         )
     for link in evidence_links:
         if link.evidence_type == InvestigationEvidenceType.SCENARIO_RESULT and link.evidence_id:
-            # §14: a linked scenario is HYPOTHETICAL evidence, never
+            #: a linked scenario is HYPOTHETICAL evidence, never
             # observed — the copilot must say so explicitly here, not just
             # rely on the scenario's own results carrying the label.
             run = db.query(ScenarioRun).filter(ScenarioRun.id == link.evidence_id, ScenarioRun.organization_id == organization_id).first()
@@ -652,7 +652,7 @@ def get_condition_history(db: Session, *, organization_id: str, sensor_id: str) 
 
 
 # ---------------------------------------------------------------------------
-# 5b. Scenario simulation evidence (Phase 11 §15) — ALWAYS labeled
+# 5b. Scenario simulation evidence — ALWAYS labeled
 # simulated. This is the only copilot tool that can return a hypothetical
 # result rather than something observed or computed on real data; every
 # EvidenceItem it produces says so explicitly, on top of

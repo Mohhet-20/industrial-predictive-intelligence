@@ -1,4 +1,4 @@
-"""Tests for app.evaluation.adversarial (Phase 10 §10/§15).
+"""Tests for app.evaluation.adversarial.
 
 Each test asserts the SUBSTANCE of its scenario's safety/provenance
 property, not just that the function ran without raising.

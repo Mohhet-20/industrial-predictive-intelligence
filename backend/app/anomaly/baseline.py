@@ -7,7 +7,7 @@ is exactly what an anomaly detector's reference period might contain,
 since real data is never perfectly clean) can drag a mean/std baseline
 far enough to mask genuine anomalies. MAD is far less sensitive to a small
 number of outliers. Mean/std are still recorded alongside for reference
-and for detectors (none in this phase) that might need them.
+and for detectors (none) that might need them.
 
 The baseline is a static summary of the WHOLE reference period, not a
 per-point rolling calculation — this is what makes the causality guarantee

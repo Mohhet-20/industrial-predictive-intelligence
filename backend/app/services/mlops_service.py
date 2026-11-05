@@ -1,9 +1,9 @@
 """Orchestration layer for the intelligence lifecycle, registry, and
-governance work (Phase 5). Mirrors app.services.anomaly_service and
+governance work. Mirrors app.services.anomaly_service and
 app.services.condition_service's conventions throughout: every function
 re-validates organization scope, every persisted row is written once and
 then only ever transitions through explicit, logged actions, and every
-"training" or "scoring" action here calls the REAL Phase 3/4 functions
+"training" or "scoring" action here calls the REAL detector/forecaster functions
 (app.services.anomaly_service.create_model_version /
 app.services.condition_service.create_forecast_model /
 app.services.anomaly_service.create_detection_run /
@@ -16,7 +16,7 @@ Lifecycle stage transitions, per app.models.mlops.LifecycleStage, and which
 functions legally perform them:
 
     EXPERIMENTING -> (not reachable via this module yet; reserved for a
-                       future phase's experiment-tracking UI — nothing
+                       later work's experiment-tracking UI — nothing
                        here creates a ComponentVersion this early)
     (created)     -> TRAINED | EVALUATED | FAILED   register_version()
     TRAINED       -> EVALUATED | FAILED             record_evaluation()
@@ -78,7 +78,7 @@ _COMPONENT_TYPE_TO_VERSION_KIND: dict[ComponentType, VersionKind] = {
 # A component_type can legally hold more than one detector_type: both
 # ISOLATION_FOREST and MAHALANOBIS are "a real sklearn estimator fit on
 # data" (app.models.mlops.ComponentType's own docstring definition of
-# TRAINED_ML_MODEL), so Phase 14's new Mahalanobis detector belongs in
+# TRAINED_ML_MODEL), so the new Mahalanobis detector belongs in
 # the same bucket as Isolation Forest, not a new component_type of its
 # own. ROBUST_ZSCORE remains the only STATISTICAL_DETECTOR member — it is
 # closed-form, not a fitted model.
@@ -105,7 +105,7 @@ def _log_event(
 
 
 # ---------------------------------------------------------------------------
-# Component & version registry (§5)
+# Component & version registry
 # ---------------------------------------------------------------------------
 
 
@@ -272,7 +272,7 @@ def list_component_versions(db: Session, *, organization_id: str, component_id: 
 
 
 # ---------------------------------------------------------------------------
-# Evaluation & validation gates (§7, §8) — task-specific, never an
+# Evaluation & validation gates — task-specific, never an
 # arbitrary universal accuracy threshold.
 # ---------------------------------------------------------------------------
 
@@ -312,7 +312,7 @@ def validate_version(
     """The human validation gate. `notes` is always mandatory — a written
     attestation of what was reviewed. What ELSE is required depends on
     version_kind, because this platform has no universal accuracy metric
-    that applies to all of them (spec §8):
+    that applies to all of them:
 
       - MODEL_VERSION: the underlying detector must already have a
         recorded synthetic evaluation (record_evaluation()) showing at
@@ -373,13 +373,13 @@ def approve_version(db: Session, *, organization_id: str, user: User, component_
 
 
 # ---------------------------------------------------------------------------
-# Activation & rollback (§9) — explicit, audited, never automatic; older
+# Activation & rollback — explicit, audited, never automatic; older
 # versions are demoted, never deleted.
 # ---------------------------------------------------------------------------
 
 
 def _check_activation_compatibility(db: Session, *, organization_id: str, version: ComponentVersion) -> None:
-    """Pre-activation compatibility validation (§9): the version must
+    """Pre-activation compatibility validation: the version must
     still reference data this organization can actually resolve right now.
     Fails loudly and explicitly rather than activating something that
     would then fail — or worse, silently misbehave — at scoring time."""
@@ -489,7 +489,7 @@ def retire_version(db: Session, *, organization_id: str, user: User, component_v
 
 
 # ---------------------------------------------------------------------------
-# Safe scoring / inference contract (§10)
+# Safe scoring inference contract
 # ---------------------------------------------------------------------------
 
 
@@ -555,7 +555,7 @@ def score_via_active_component(
 
 
 # ---------------------------------------------------------------------------
-# Controlled retraining workflow (§13): REQUEST -> (explicit) EXECUTE ->
+# Controlled retraining workflow: REQUEST -> (explicit) EXECUTE ->
 # real TRAIN/EVALUATE -> a new ComponentVersion at TRAINED/EVALUATED/FAILED.
 # Never activates anything automatically.
 # ---------------------------------------------------------------------------
@@ -600,7 +600,7 @@ def _resolve_retraining_detector_type(db: Session, *, component: IntelligenceCom
     """A TRAINED_ML_MODEL component can now hold either ISOLATION_FOREST or
     MAHALANOBIS versions (see _COMPONENT_TYPE_TO_DETECTOR_TYPES above), so
     retraining can no longer assume a single fixed detector_type for that
-    component_type the way it could before Phase 14. Resolution order:
+    component_type the way it could. Resolution order:
       1. An explicit config["detector_type"], if given — validated against
          what this component_type allows.
       2. Otherwise, whatever detector_type the component's most recent
@@ -648,7 +648,7 @@ def _resolve_retraining_detector_type(db: Session, *, component: IntelligenceCom
 
 def execute_retraining_request(db: Session, *, organization_id: str, user: User, request_id: str) -> RetrainingRequest:
     """Executes exactly one retraining request by calling the SAME real
-    training functions Phases 3-4 built. Committing the RUNNING state
+    training functions built. Committing the RUNNING state
     before entering the try block (not just flushing) is deliberate — see
     app.services.condition_service.create_condition_run's identical
     comment for the exact bug this pattern prevents: without a hard
@@ -722,7 +722,7 @@ def execute_retraining_request(db: Session, *, organization_id: str, user: User,
 
 
 # ---------------------------------------------------------------------------
-# Data / feature shift analysis (§12) — genuinely new; never auto-retrains.
+# Data feature shift analysis — genuinely new; never auto-retrains.
 # ---------------------------------------------------------------------------
 
 
@@ -821,7 +821,7 @@ def list_shift_analysis_runs(db: Session, *, organization_id: str, sensor_id: Op
 
 
 # ---------------------------------------------------------------------------
-# Governance audit log (§14) — read access
+# Governance audit log — read access
 # ---------------------------------------------------------------------------
 
 
@@ -835,8 +835,8 @@ def list_governance_events(db: Session, *, organization_id: str, component_id: O
 
 
 # ---------------------------------------------------------------------------
-# Monitoring (§11) — OPERATIONAL / DATA / MODEL PERFORMANCE, kept distinct.
-# Reuses Phase 3/4's real monitoring summaries rather than duplicating
+# Monitoring — OPERATIONAL DATA MODEL PERFORMANCE, kept distinct.
+# Reuses the real monitoring summaries rather than duplicating
 # their queries; never calls a distribution comparison "drift".
 # ---------------------------------------------------------------------------
 

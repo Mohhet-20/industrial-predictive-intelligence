@@ -1,4 +1,4 @@
-"""Scenario simulation / what-if intelligence layer (Phase 11).
+"""Scenario simulation what-if intelligence layer.
 
 THIS IS SCENARIO ANALYSIS, NOT A PERFECT PHYSICAL DIGITAL TWIN. Nothing in
 this package claims physical realism, invents a sensor relationship, or

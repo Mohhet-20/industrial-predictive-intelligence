@@ -1,4 +1,4 @@
-"""Data-quality impact analysis (Phase 10 §6).
+"""Data-quality impact analysis.
 
 Measures the relationship between data-quality conditions and downstream
 intelligence outputs using the REAL detector-running code
@@ -77,7 +77,7 @@ def gap_adjacent_to_anomaly_impact(*, seed: int = 1) -> dict:
     """Compares recall on the SAME injected-anomaly pattern with and
     without a data gap immediately following each event, using the exact
     same detector configuration and matching tolerance for both runs so
-    the comparison is fair (Phase 10 §4's fairness requirement applied
+    the comparison is fair ('s fairness requirement applied
     to a data-quality axis rather than a model-comparison axis)."""
     clean_scenario = synthetic_scenarios.point_anomaly_scenario(start=EVAL_START, seed=seed)
     gapped_scenario = _build_gap_adjacent_point_anomaly(seed=seed, gap_len=6)  # 30 minutes at 5-min cadence

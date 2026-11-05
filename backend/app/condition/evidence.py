@@ -1,4 +1,4 @@
-"""Equipment Condition Intelligence — evidence, not a verdict (Phase 4 §2).
+"""Equipment Condition Intelligence — evidence, not a verdict.
 
 Computes a bundle of independent, explainable evidence about a sensor's
 recent behavior from real stored data. Every piece of evidence states its
@@ -10,7 +10,7 @@ Five kinds of evidence:
     reused here rather than re-implemented, so "trend" means exactly one
     thing across this whole codebase.
   - persistent_anomaly_evidence: counts and timing of REAL detector-flagged
-    Anomaly rows (Phase 3) touching this sensor in the window — genuine
+    Anomaly rows touching this sensor in the window — genuine
     detection history, never re-derived or estimated.
   - deviation_from_baseline: current window's robust statistics compared
     against a declared reference-period baseline (app.anomaly.baseline's
@@ -20,13 +20,13 @@ Five kinds of evidence:
     plain effect-size statistic, not a new model).
   - cross_sensor_association: Pearson correlation with sibling sensors on
     the same asset over the window (app.timeseries.multi_sensor, reused
-    directly) — association, never causation, same caveat as Phase 2.
+    directly) — association, never causation, same caveat as.
 
 WHY NO COMPOSITE SCORE: a single blended "health score" combining a
 p-value, a MAD ratio, a variance ratio, a correlation coefficient, and an
 anomaly count requires weights this platform has no validated basis for
 choosing. Publishing one would look authoritative while being an arbitrary
-opinion dressed as measurement — exactly what Phase 4 forbids. Each piece
+opinion dressed as measurement — exactly what forbids. Each piece
 of evidence is reported on its own terms; a human reviewer combines them
 using engineering judgment this platform does not have.
 """
@@ -53,7 +53,7 @@ VARIANCE_CHANGE_MIN_RATIO = 2.0
 def summarize_anomaly_persistence(
     anomalies: list[dict[str, Any]], *, window_start: datetime, window_end: datetime
 ) -> dict[str, Any]:
-    """Real evidence from Phase 3's Anomaly rows — never re-scored here.
+    """Real evidence from the Anomaly rows — never re-scored here.
     `anomalies` is the list of already-queried, already-authorized Anomaly
     rows (as plain dicts: severity_tier, status, period_start) for this
     sensor in the window; DB access happens in the service layer, not here."""
@@ -138,7 +138,7 @@ def compute_deviation_from_baseline(
 def compute_variance_change_evidence(window_series: pd.Series) -> dict[str, Any]:
     """Reuses app.timeseries.change_detection's variance-shift candidate
     detector unmodified — the same plain effect-size statistic used for
-    Phase 2's change candidates, applied here as one input to condition
+    the change candidates, applied here as one input to condition
     evidence rather than as a standalone alert."""
     candidates = change_detection.detect_variance_shift_candidates(
         window_series, window_size=VARIANCE_CHANGE_WINDOW_SIZE, min_ratio=VARIANCE_CHANGE_MIN_RATIO
@@ -187,7 +187,7 @@ def compute_condition_evidence(
         window_series, reference_series=reference_series, reference_start=reference_start, reference_end=reference_end
     )
     if reference_end > window_start:
-        # This endpoint is a stateless, exploratory viewer (like Phase 2's
+        # This endpoint is a stateless, exploratory viewer (like the
         # profiling/analysis endpoints) and does not reject an overlapping
         # reference period the way app.services.condition_service.
         # create_condition_run does for a persisted signal — but it must

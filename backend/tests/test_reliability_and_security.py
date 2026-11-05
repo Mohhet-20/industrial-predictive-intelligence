@@ -1,4 +1,4 @@
-"""Phase 7 — production reliability & security hardening tests.
+"""Production reliability & security hardening tests.
 
 Covers what app/core/config.py, app/core/middleware.py, app/core/rate_limit.py,
 app/jobs/runner.py, and app/api/v1/system.py actually do, including failure
@@ -19,7 +19,7 @@ from app.models.user import User, UserRole
 
 
 # --------------------------------------------------------------------------
-# §2 — config/environment validation
+# — config/environment validation
 # --------------------------------------------------------------------------
 
 def test_production_config_rejects_default_jwt_secret():
@@ -33,7 +33,7 @@ def test_production_config_rejects_default_jwt_secret():
         Settings(
             app_env="production",
             jwt_secret_key=_DEV_DEFAULT_JWT_SECRET,
-            database_url="sqlite:////tmp/phase 7-config-test.db",
+            database_url="sqlite:////tmp/config-test.db",
             cors_origins="https://app.example.com",
         )
 
@@ -43,7 +43,7 @@ def test_production_config_rejects_wildcard_cors():
         Settings(
             app_env="production",
             jwt_secret_key="a-real-random-production-secret-value-not-the-default",
-            database_url="sqlite:////tmp/phase 7-config-test.db",
+            database_url="sqlite:////tmp/config-test.db",
             cors_origins="*",
         )
 
@@ -62,7 +62,7 @@ def test_production_config_accepts_safe_values():
     settings = Settings(
         app_env="production",
         jwt_secret_key="a-real-random-production-secret-value-not-the-default",
-        database_url="sqlite:////tmp/phase 7-config-test.db",
+        database_url="sqlite:////tmp/config-test.db",
         cors_origins="https://app.example.com",
     )
     assert settings.is_production is True
@@ -81,7 +81,7 @@ def test_short_jwt_secret_always_rejected_regardless_of_environment():
 
 
 # --------------------------------------------------------------------------
-# §6 — background job reliability: timeout, duplicate protection, no-handler
+# — background job reliability: timeout, duplicate protection, no-handler
 # --------------------------------------------------------------------------
 
 def test_hung_job_times_out_and_is_marked_failed_not_left_running(db_session, org_and_admin):
@@ -165,7 +165,7 @@ def test_duplicate_dedup_key_rejected_while_active_then_allowed_after_completion
 
 
 # --------------------------------------------------------------------------
-# §10 — security hardening: rate limiting, headers, timing, body size
+# — security hardening: rate limiting, headers, timing, body size
 # --------------------------------------------------------------------------
 
 def test_rate_limiter_blocks_after_max_attempts_and_recovers_with_a_new_key():
@@ -229,7 +229,7 @@ def test_oversized_request_body_rejected_with_413(client):
 
 
 # --------------------------------------------------------------------------
-# §12 — observability: GET /system/metrics is real, authorized, and bounded
+# — observability: GET /system/metrics is real, authorized, and bounded
 # --------------------------------------------------------------------------
 
 def test_system_metrics_reflects_real_recorded_requests(client, auth_headers):
@@ -269,7 +269,7 @@ def test_system_metrics_requires_authentication(client):
 
 
 # --------------------------------------------------------------------------
-# §3 — readiness must report real, non-blocking diagnostics
+# — readiness must report real, non-blocking diagnostics
 # --------------------------------------------------------------------------
 
 def test_readiness_reports_ok_and_schema_version_on_a_healthy_db(client):
@@ -283,7 +283,7 @@ def test_readiness_reports_ok_and_schema_version_on_a_healthy_db(client):
 
 def test_liveness_is_unaffected_by_a_broken_database_but_readiness_reports_it(client):
     # Liveness must answer even if the DB dependency would fail — that is
-    # exactly the distinction between liveness and readiness (§3). Break
+    # exactly the distinction between liveness and readiness. Break
     # the get_db dependency the same way the `client` fixture wires it, and
     # confirm liveness (no DB dependency at all) is unaffected while
     # readiness (which explicitly depends on get_db) reports the failure

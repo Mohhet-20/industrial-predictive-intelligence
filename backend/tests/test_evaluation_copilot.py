@@ -1,4 +1,4 @@
-"""Tests for app.evaluation.copilot_eval (Phase 10 §9/§15).
+"""Tests for app.evaluation.copilot_eval.
 
 Runs the representative groundedness case battery end-to-end against the
 real copilot API/service/orchestrator path and asserts each case's own

@@ -2,7 +2,7 @@
 
 Builds a per-grid-point FEATURE VECTOR (not raw values) for one or more
 sensors using `app.timeseries.dataset_builder.build_feature_matrix` — the
-exact same causal, leakage-safe feature computation the Phase 2
+exact same causal, leakage-safe feature computation the
 feature/dataset-builder layer uses elsewhere (`compute_feature_value`
 internally re-filters to `timestamp <= as_of`, so nothing here needs to
 re-implement or re-verify that guarantee). An `sklearn.ensemble.
@@ -14,7 +14,7 @@ assumption (unlike the z-score detector's implicit near-normality),
 handles multivariate input naturally — useful for "multivariate mode"
 below — and trains fast enough on the data volumes this platform handles
 to run synchronously. It is explicitly NOT a deep-learning model: nothing
-about a few thousand feature rows per sensor justifies one, and the spec
+about a few thousand feature rows per sensor justifies one, and the design
 this was built against is explicit that depth must be justified by data,
 not used for appearance.
 

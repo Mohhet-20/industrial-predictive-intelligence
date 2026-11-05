@@ -3,7 +3,7 @@
 Everything below (sections 1–4) runs with no external infrastructure (no
 Docker, no Postgres, no Redis) — see ARCHITECTURE.md §6 for why SQLite is
 the right choice for this foundation. Section 5 covers the optional
-Docker/Compose path added in Phase 7 for a deployment-like environment —
+Docker/Compose path added for a deployment-like environment —
 see docs/RELIABILITY_AND_OPERATIONS.md §1 for the three-environment
 distinction (LOCAL DEV / TESTING-CI / DEPLOYMENT-PRODUCTION-LIKE) this
 file's sections map onto.
@@ -76,7 +76,7 @@ python -m pytest -q
 267 tests as of this build, covering ingestion validation, deduplication,
 timestamp handling, data-quality checks, API contracts, auth/RBAC, the
 async background-job path (including timeout and duplicate-submission
-protection — Phase 7), anomaly detection, condition/forecasting, MLOps
+protection), anomaly detection, condition/forecasting, MLOps
 governance, intelligence orchestration/investigation, and reliability/
 security hardening (rate limiting, config validation, security headers,
 readiness under a real broken-DB injection). All passing is part of
@@ -112,7 +112,7 @@ from the repository root:
 
 For a real, live, end-to-end demonstration of the actual investigation
 workflow (not just unit tests) against the seeded demo dataset, run the
-Phase 8 acceptance test from `backend/` with the venv active:
+Acceptance test from `backend/` with the venv active:
 
 ```bash
 python ../scripts/e2e_acceptance_test.py
@@ -124,9 +124,9 @@ real investigation, attaches evidence, adds an annotation, transitions
 status, confirms nothing was silently mutated, and checks two honest
 failure paths. It writes real rows into your dev database each time it
 runs (a new investigation per run), same as the live-validation scripts
-from earlier phases.
+from earlier work.
 
-Similarly, for the optional AI copilot (Phase 9), run its own acceptance
+Similarly, for the optional AI copilot, run its own acceptance
 test the same way:
 
 ```bash
@@ -182,11 +182,11 @@ to work, just not yet proven to.
 - **"JWT_SECRET_KEY must be set..."**: the backend refuses to start with a
   short/empty secret — see `.env.example`.
 - **"Refusing to start with APP_ENV=production and unsafe configuration"**:
-  the Phase 7 production-safety check — see
+  the production-safety check — see
   docs/RELIABILITY_AND_OPERATIONS.md §2. Only fires when `APP_ENV=production`;
   local dev is unaffected.
 - **Login returns 429 after a handful of attempts while testing**: the
-  Phase 7 anti-brute-force rate limit on `/auth/login` (5 attempts/60s by
+  Anti-brute-force rate limit on `/auth/login` (5 attempts/60s by
   default, per IP+email) — wait a minute, or adjust
   `LOGIN_RATE_LIMIT_ATTEMPTS`/`LOGIN_RATE_LIMIT_WINDOW_SECONDS`. See
   docs/RELIABILITY_AND_OPERATIONS.md §10.

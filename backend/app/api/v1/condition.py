@@ -1,7 +1,7 @@
-"""Equipment Condition Intelligence & Forecasting API (Phase 4).
+"""Equipment Condition Intelligence & Forecasting API.
 
 Supersedes and replaces the old `/intelligence/predictions` 501 stub
-(app.api.v1.intelligence, removed in this phase — Phase 3's anomaly
+(app.api.v1.intelligence, removed — the anomaly
 detection had already superseded that router's other routes, and Phase
 4's forecasting work is what the `Prediction` table and this stub were
 always reserved for; see app.models.condition's module docstring). Every
@@ -49,7 +49,7 @@ _WRITE_ROLES = (UserRole.ADMIN, UserRole.ENGINEER)
 
 
 # ---------------------------------------------------------------------------
-# Condition evidence (§2) — stateless
+# Condition evidence — stateless
 # ---------------------------------------------------------------------------
 
 
@@ -71,7 +71,7 @@ def get_condition_evidence(
 
 
 # ---------------------------------------------------------------------------
-# Degradation analysis runs & signals (§3, §12)
+# Degradation analysis runs & signals
 # ---------------------------------------------------------------------------
 
 
@@ -167,7 +167,7 @@ def list_degradation_reviews(signal_id: str, org_id: str = Depends(organization_
 
 
 # ---------------------------------------------------------------------------
-# Forecasting (§4, §5-refusal) — fit always backtests; runs are gated
+# Forecasting — fit always backtests; runs are gated
 # ---------------------------------------------------------------------------
 
 
@@ -244,7 +244,7 @@ def get_forecast_run(run_id: str, org_id: str = Depends(organization_scope), db:
 
 
 # ---------------------------------------------------------------------------
-# Risk prioritization (§11) & monitoring (§16)
+# Risk prioritization & monitoring
 # ---------------------------------------------------------------------------
 
 

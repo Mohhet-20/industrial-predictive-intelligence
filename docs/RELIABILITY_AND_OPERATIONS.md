@@ -1,7 +1,5 @@
-# Reliability, Deployment & Operations — Phase 7
-
-Status: **Phase 7 — Production Reliability, Deployment Architecture, Security
-Hardening & System Observability**, built on top of Phases 1–6 (ingestion/DQ,
+# Reliability, Deployment & Operations
+built on top (ingestion/DQ,
 time-series intelligence, anomaly detection, condition/forecasting, MLOps
 governance, intelligence orchestration & investigation). This document
 describes what actually exists and was actually validated in this
@@ -22,25 +20,25 @@ a command whose real output is quoted.
 ## §0. Production-readiness capability map
 
 Audited fresh against this repository as it existed at the start of Phase
-7 (before any of this phase's own changes), per this project's standing
+7 (before any of its own changes), per this project's standing
 rule to never assume a capability exists without checking.
 
-| Area | Status (pre-Phase-7) | Phase 7 change |
+| Area | Status (before) | Change |
 |---|---|---|
 | App architecture | IMPLEMENTED AND TESTED — modular monolith, single FastAPI deployable, in-process job runner (ARCHITECTURE.md) | Documented deployment shape more explicitly (§1) |
 | Frontend | IMPLEMENTED AND TESTED — React/TS/Vite SPA, per-page loading/empty/error states | Added route-level error boundary, network-vs-API-error distinction, timeout (§9) |
 | Backend | IMPLEMENTED AND TESTED — FastAPI, typed Pydantic schemas, service-layer separation | Rate limiting, body-size limits, security headers, metrics (§6, §8, §10, §12) |
 | DB/storage | IMPLEMENTED AND TESTED — SQLite + Alembic, FK enforcement, WAL mode | Readiness now reports schema version; dependency/backup docs (§3, §7) |
 | Background jobs | IMPLEMENTED BUT UNVALIDATED — runner existed, but no timeout, no duplicate protection, retry fields unused | Timeout + duplicate-submission protection added and tested (§6) |
-| ML/AI runtime | IMPLEMENTED AND TESTED — detectors, condition/forecasting all had explicit failure paths (Phases 3–5) | Reviewed, not materially changed — findings in §11 |
+| ML/AI runtime | IMPLEMENTED AND TESTED — detectors, condition/forecasting all had explicit failure paths | Reviewed, not materially changed — findings in §11 |
 | External deps | DEVELOPMENT ONLY — none (no external services; SQLite is a file, not a service) | Unchanged — documented explicitly in §1 |
 | Auth | IMPLEMENTED AND TESTED — JWT + bcrypt + RBAC, real and enforced | Login rate limiting, timing-attack fix, production config guard (§10) |
 | Deployment config | NOT IMPLEMENTED — no Dockerfile, no compose, no deployment docs beyond SETUP.md (local dev only) | Dockerfiles + docker-compose written; §1/§17 (see validation caveat there) |
 | Env config | IMPLEMENTED BUT UNVALIDATED — Settings existed, validated JWT length, nothing else | Production-safety validator (fails fast on unsafe prod config) — §2 |
 | Logging | IMPLEMENTED AND TESTED — structured JSON, correlation IDs, already solid | Unchanged; reviewed for secret leakage (§4) |
 | Error handling | IMPLEMENTED AND TESTED — consistent `{error:{...}}` shape, no stack traces to clients | Reviewed; classification confirmed (§5) |
-| Testing | IMPLEMENTED AND TESTED — 247 backend tests pre-Phase-7 | +20 backend, +11 frontend (new frontend test runner) — §16, §19 |
-| Build tooling | IMPLEMENTED BUT UNVALIDATED — `npm run build` worked but silently emitted stray files into the source tree (found this phase) | Fixed (§16); ESLint was installed but never configured — now wired and clean |
+| Testing | IMPLEMENTED AND TESTED — 247 backend tests pre-original | +20 backend, +11 frontend (new frontend test runner) — §16, §19 |
+| Build tooling | IMPLEMENTED BUT UNVALIDATED — `npm run build` worked but silently emitted stray files into the source tree (found during this work) | Fixed (§16); ESLint was installed but never configured — now wired and clean |
 | CI/CD | NOT IMPLEMENTED — no workflow file of any kind | `.github/workflows/ci.yml` + `scripts/ci_check.sh`, the latter actually run (§16) |
 | Containerization | NOT IMPLEMENTED | Dockerfiles + compose written; **not build-validated in this environment** — see §1's explicit caveat |
 | Secrets handling | IMPLEMENTED AND TESTED — env vars, `.env` gitignored, no committed secrets | Extended: production-mode rejects the checked-in dev secret (§2, §10) |
@@ -51,7 +49,7 @@ rule to never assume a capability exists without checking.
 
 ## §1. Deployment architecture
 
-**The actual shape of this system**, unchanged in kind by this phase, only
+**The actual shape of this system**, unchanged in kind, only
 made more explicit and given a container path:
 
 ```
@@ -77,8 +75,8 @@ There is exactly one deployable backend and one deployable frontend. There
 is no separate "worker" process — the background job runner in
 `app/jobs/runner.py` is asyncio tasks inside the same uvicorn process, which
 is why there's only one container in `docker-compose.yml`, not two. This is
-the same reasoning ARCHITECTURE.md §3/§4 gave for a modular monolith in
-Phase 1, extended rather than revisited: the actual async workload
+the same reasoning ARCHITECTURE.md §3/§4 gave for a modular monolith from
+the start, extended rather than revisited: the actual async workload
 (batch ingestion, a detection run) is seconds-to-low-minutes of work, not a
 volume that justifies a separate worker fleet.
 
@@ -86,7 +84,7 @@ volume that justifies a separate worker fleet.
 
 - **LOCAL DEV** — `uvicorn --reload` + `npm run dev`, SQLite file,
   `APP_ENV=development`. This is what SETUP.md documents and what every
-  test/validation run in Phases 1–6 used. **Fully validated**, repeatedly,
+  test/validation run used. **Fully validated**, repeatedly,
   throughout this project.
 - **TESTING-CI** — `scripts/ci_check.sh` (and the equivalent
   `.github/workflows/ci.yml`): fresh venv, fresh SQLite file, migrations
@@ -108,7 +106,7 @@ volume that justifies a separate worker fleet.
   not a defect in the Dockerfiles. Building and running this compose stack
   is expected to work on a developer machine or a CI runner with normal
   registry access, but that claim is **not proven by this project** — it is
-  explicitly the one part of this phase's work that stays in the
+  explicitly the one part of this work that stays in the
   "configured, not validated here" tier. Anyone picking this up should
   treat `docker compose up --build` as the very first thing to try, before
   trusting anything else in this section.
@@ -117,7 +115,7 @@ There is no cloud deployment target (AWS/GCP/Azure-specific config,
 managed database, load balancer, CDN) anywhere in this project, and none is
 claimed. "Deploying this" beyond a single machine is out of scope and
 undocumented on purpose — claiming otherwise without ever having tried it
-would be exactly the kind of unsupported claim this phase forbids.
+would be exactly the kind of unsupported claim this project forbids.
 
 **Tier: IMPLEMENTED (LOCAL DEV, TESTING-CI) / DEPLOYMENT CONFIGURATION
 REQUIRED (containerized path — written, statically checked, not build-
@@ -128,7 +126,7 @@ validated here).**
 ## §2. Environment & configuration management
 
 `app/core/config.py`'s `Settings` (pydantic-settings) already validated
-`JWT_SECRET_KEY`'s length before this phase. New this phase: a
+`JWT_SECRET_KEY`'s length beforehand. New here: a
 `model_validator` that runs a **second, stricter pass only when
 `APP_ENV=production`**, and refuses to start (raises `ValidationError`,
 which is a hard crash at import time, not a warning) if:
@@ -148,7 +146,7 @@ completely unaffected. Tested directly (`test_production_config_rejects_*`,
 `docker-compose.yml` (§15: the compose file's own `JWT_SECRET_KEY:?...`
 guard fails the same way, one layer higher, before the app even starts).
 
-Other config facts, unchanged from Phase 1 but reconfirmed:
+Other config facts, unchanged but reconfirmed:
 `.env.example` files (backend, frontend, and now the repo root for
 compose) contain no real secrets; `.env` is gitignored everywhere; no
 backend secret or internal config value is ever sent to the frontend (the
@@ -185,9 +183,9 @@ server-side (not swallowed).
 
 ## §4. Structured logging & correlation
 
-Unchanged in mechanism from Phase 1 (`app/core/logging.py`,
+Unchanged in mechanism (`app/core/logging.py`,
 `CorrelationIdMiddleware`) — already solid, reviewed rather than rebuilt
-this phase. Every log line is one JSON object with `timestamp`, `level`,
+this layer. Every log line is one JSON object with `timestamp`, `level`,
 `logger`, `message`, and (when set) `correlation_id`; the correlation ID
 comes from an inbound `X-Correlation-ID`/`X-Request-ID` header or is
 generated per-request, threaded through a contextvar so service-layer and
@@ -197,7 +195,7 @@ into the job (`job_runner.submit(..., correlation_id=...)`), so a job's log
 lines are traceable back to the request that queued it — confirmed by
 reading every `job_runner.submit(` call site (§6 lists them).
 
-Reviewed for secret leakage this phase: grepped every `logger`/
+Reviewed for secret leakage: grepped every `logger`/
 `log_with_fields` call in the codebase for `password`, `token`, `secret`,
 `hashed_password` — none log credential material. `auth_service.py` never
 logs the password it receives (`authenticate()` only compares it via
@@ -228,7 +226,7 @@ for_internal_errors` (pre-existing) and the new readiness-failure test in
 
 ## §6. Background job reliability
 
-This is where the real, substantive Phase 7 work is: the pre-existing
+This is where the real, substantive work is: the pre-existing
 `JobRunner` (`app/jobs/runner.py`) had genuine status/progress/result/error
 tracking, but **no timeout** (a hung job stayed `RUNNING` forever), **no
 duplicate-submission protection**, and two unused schema columns
@@ -287,15 +285,15 @@ NOT IMPLEMENTED (automatic retry — deliberate, documented).**
 ## §7. Database & data reliability
 
 Reviewed, not restructured — this project's data-integrity posture was
-already solid from Phase 1 onward (immutable `SensorMeasurement` rows,
+already solid onward (immutable `SensorMeasurement` rows,
 every derived table with a real FK back to its source, `PRAGMA
 foreign_keys=ON` explicitly enabled for SQLite since it's off by default,
 WAL mode for concurrent read/write, `db.commit()`-before-`try` patterns
 throughout the service layer so a mid-operation failure still records a
-real failure state instead of losing it). What Phase 7 adds:
+real failure state instead of losing it). What adds:
 
 - **Migration safety, reconfirmed.** Every migration in `alembic/versions/`
-  — six before this phase's own additions, one new one
+  — six beforehand's own additions, one new one
   (`6a3b828a4788_background_job_dedup_key.py`) — is purely additive (new
   tables/columns/indexes, never a drop or a type change). `alembic check`
   reports `"No new upgrade operations detected."` against the real dev
@@ -319,11 +317,11 @@ real failure state instead of losing it). What Phase 7 adds:
   top of; that swap is unbuilt and stays unbuilt here — same "don't build
   infrastructure the current scale doesn't justify" reasoning as everywhere
   else in this project.
-- **Data-integrity test coverage**, spot-checked this phase rather than
+- **Data-integrity test coverage**, spot-checked rather than
   rewritten: FK enforcement, unique constraints
-  (`uq_investigation_evidence`, `uq_investigation_relation` from Phase 6),
+  (`uq_investigation_evidence`, `uq_investigation_relation`),
   and the immutability boundary (an anomaly's `raw_score`/`status` fields
-  are asserted unchanged after evidence-linking in the Phase 6 live
+  are asserted unchanged after evidence-linking live
   validation script) all already had real test coverage before this
   phase; nothing new was needed here.
 
@@ -351,13 +349,13 @@ confirmed already solid:
   after 20s so a hung backend call doesn't hang a page's UI forever.
 - **Pagination/bounded queries** — already consistent: every list endpoint
   in this codebase returns the `Page<T>` shape with `limit`/`offset`, and
-  every prior phase's services impose their own hard cap (`MAX_RANGE`
+  each layer's services impose their own hard cap (`MAX_RANGE`
   on measurement queries, `MAX_PER_SOURCE = 300` in orchestration,
   `MAX_DATASET_ROWS_TOTAL`/`MAX_DETECTION_ROWS_SYNC` for builds/runs).
   Reconfirmed, not changed.
 - **Idempotency for appropriate writes** — reviewed. Investigation status
-  transitions are guarded by an explicit allowed-transition map (Phase 6),
-  duplicate evidence links are rejected (Phase 6), and the new job-runner
+  transitions are guarded by an explicit allowed-transition map,
+  duplicate evidence links are rejected, and the new job-runner
   duplicate protection (§6) covers the two job-backed writes with a natural
   key. **Known, documented gap**: there is no request-level idempotency key
   for `POST` endpoints in general — a client-side network retry of, say,
@@ -414,7 +412,7 @@ Two real gaps found and fixed:
   `not_yet_available` response (a capability that exists in the schema but
   has no logic yet), `EmptyState` for a real empty list, `ErrorState` for
   an `ApiError`. This pre-existing pattern already distinguishes "no data"
-  from "analysis unavailable" from "system error"; Phase 7 didn't need to
+  from "analysis unavailable" from "system error"; this work didn't need to
   touch it, only extend the underlying error types it renders.
 
 **Tier: IMPLEMENTED AND VALIDATED.**
@@ -508,13 +506,13 @@ Real findings, real fixes, documented rather than hidden:
    nil even though the advisory is real. The fix is `react-router-dom`
    6→7, a major version this project hasn't validated. Both documented
    here rather than silently ignored; both are legitimate "upgrade
-   requires validation this phase didn't have room for" deferrals, not
+   requires validation this work didn't have room for" deferrals, not
    "didn't look."
 7. **Model/artifact trust boundaries** — reviewed, unchanged: no model
    artifact is ever loaded from a file path derived from user input (there
    is no artifact file at all — see MLOPS_GOVERNANCE.md §7), so there is no
    deserialization/path-traversal surface here to harden.
-8. **Audit logging** — unchanged from Phase 5/6: `GovernanceEvent`,
+8. **Audit logging** — unchanged: `GovernanceEvent`,
    `InvestigationStatusEvent`, `InvestigationAnnotation` are all real,
    append-only audit trails already covered by those phases' own test
    suites.
@@ -533,7 +531,7 @@ stated reason).**
 
 ## §11. ML/AI system reliability
 
-Reviewed against Phases 3–5's existing failure-path coverage rather than
+Reviewed against the existing failure-path coverage rather than
 rebuilt — this was already a strong point of this project (the "honesty
 over fabrication" principle runs through the whole platform, not just this
 phase). Confirmed, by reading the actual code paths rather than assuming:
@@ -543,7 +541,7 @@ phase). Confirmed, by reading the actual code paths rather than assuming:
   raises `ValidationFailedError` (422) rather than training on too little
   data; covered by the pre-existing
   `test_training_with_insufficient_reference_data_reports_failed_not_500`.
-- **Feature schema mismatch** — condition/forecasting (Phase 4) validates
+- **Feature schema mismatch** — condition/forecasting validates
   sensor/feature configuration before running, not during, with explicit
   errors for a config that doesn't match what's actually available.
 - **Model artifact unavailable** — not applicable to this system by
@@ -553,14 +551,14 @@ phase). Confirmed, by reading the actual code paths rather than assuming:
   partial/corrupt-file state is possible.
 - **Detector/model execution failure** — `execute_detection_run` catches
   execution errors, sets `ModelRunStatus.FAILED` with a real error message,
-  and (as of this phase's §6 work) is now also protected by the job-runner
+  and (currently's §6 work) is now also protected by the job-runner
   timeout if it hangs rather than errors cleanly.
-- **Insufficient data for forecasting** — Phase 4's honesty-gated
+- **Insufficient data for forecasting** — the honesty-gated
   forecasting explicitly refuses to forecast below a minimum data
   threshold rather than extrapolating from too little, returning a
   labeled "insufficient evidence" result rather than a number.
 - **Stale/incompatible component versions** — MLOPS_GOVERNANCE.md's
-  version/governance model (Phase 5) already tracks exactly this; nothing
+  version/governance model already tracks exactly this; nothing
   new needed.
 
 No new gap was found here worth a dedicated fix — this section is a
@@ -574,7 +572,7 @@ reading, no new gaps found).**
 
 ## §12. System observability foundation
 
-**New this phase, in full**: there was no metrics endpoint of any kind
+**New here, in full**: there was no metrics endpoint of any kind
 before. `app/core/metrics.py` is an in-process, thread-safe (the app runs
 sync routes on FastAPI's worker threadpool, so this genuinely needs a lock,
 unlike most of this codebase's async-only state) counter store recording
@@ -615,7 +613,7 @@ justifies it" position. Surfaced in the frontend's System Health page
 
 **Deliberately not an alerting system** — no PagerDuty/Opsgenie/email
 integration exists or is configured anywhere in this project, and building
-one would be exactly the "fake alerting system" this phase explicitly
+one would be exactly the "fake alerting system" this project explicitly
 forbids. What follows is documentation of which conditions, measurable by
 what already exists (§12), should trigger operator attention in a real
 deployment:
@@ -643,7 +641,7 @@ documented; no actual alert dispatch integration exists or is claimed).**
 
 Real measurements, not invented ones — run via
 `fastapi.testclient.TestClient` against this project's actual seeded dev
-database (org "Riverbend Manufacturing", the same one every prior phase's
+database (org "Riverbend Manufacturing", the same one each layer's
 live validation used), through the full stack (HTTP → middleware → auth →
 service → DB → JSON serialization), 5–8 iterations per endpoint, min/
 median/max reported:
@@ -682,17 +680,17 @@ Observations, not invented benchmarks:
   defense. Nothing here was "optimized" — weakening bcrypt's work factor to
   make login faster would be a real security regression for a cosmetic
   latency win.
-- Every orchestration/timeline/summary path (Phase 6's read-only
+- Every orchestration/timeline/summary path (the read-only
   synthesis layer) is comfortably fast (single-digit to low-double-digit
   milliseconds) at this data scale — no bottleneck found, no change made.
 
 No frontend rendering profiling was performed (would require a browser
-automation pass beyond this phase's backend-focused scope); the bundle
+automation pass beyond this work's backend-focused scope); the bundle
 size warning from `vite build` (~758KB main chunk, pre-existing since
-Phase 1, unchanged by this phase) is noted as a known, low-priority
-capacity consideration for a future phase, not fixed here — code-splitting
+the start, unchanged) is noted as a known, low-priority
+capacity consideration for later work, not fixed here — code-splitting
 eight-plus feature-rich pages into one bundle is exactly the kind of
-premature-optimization tradeoff this phase's reasoning argues against
+premature-optimization tradeoff this layer's reasoning argues against
 addressing without an observed problem.
 
 **Tier: IMPLEMENTED AND VALIDATED (real measurements taken; no fabricated
@@ -717,7 +715,7 @@ what's reported:
 | No handler registered for a job type | `submit()` called for `JobType.DETECTOR_TRAINING` (genuinely unregistered — confirmed via `app/jobs/handlers.py`) | `FAILED` with `"No handler registered..."`, not a hang |
 | Malformed/oversized request | An ~11MB JSON body posted to `/auth/login` | 413, rejected before parsing |
 | Repeated login failures | 6 real `POST /auth/login` calls against a real user | 6th (and a subsequent *correct*-password attempt) returns 429 |
-| Insufficient training data | Pre-existing `test_training_with_insufficient_reference_data_reports_failed_not_500` re-run as part of this phase's full suite | Confirmed still passes: 422, not 500, not a fabricated model |
+| Insufficient training data | Pre-existing `test_training_with_insufficient_reference_data_reports_failed_not_500` re-run as part of this layer's full suite | Confirmed still passes: 422, not 500, not a fabricated model |
 | Authorization boundary | Viewer role calling `GET /system/metrics` | 403, not partial/redacted data |
 
 No chaos-engineering framework or tool was used or is claimed — every
@@ -733,7 +731,7 @@ was performed"). It was.
 ## §16. CI / quality automation
 
 **Real gap found and fixed**: `eslint`, `@typescript-eslint/*` were already
-in `package.json` before this phase, but there was no `eslint.config.js`
+in `package.json` beforehand, but there was no `eslint.config.js`
 and no `lint` script — the tooling was installed and inert. Fixed:
 `eslint.config.js` (flat config, TypeScript + a deliberately conservative
 subset of `eslint-plugin-react-hooks` — see that file's own comment for why
@@ -743,7 +741,7 @@ run clean.
 
 **Real gap found and fixed, independently**: `npm run build` (`tsc -b &&
 vite build`) silently emitted `vite.config.js` and two `.tsbuildinfo` files
-directly into `frontend/` on every single run, since Phase 1 — a
+directly into `frontend/` on every single run, — a
 TypeScript project-references quirk (a referenced composite project cannot
 set `noEmit`, so without an explicit `outDir` it emits next to source).
 Never caused a visible failure, so nobody had reason to notice; found by
@@ -753,13 +751,13 @@ not by assumption. Fixed by routing both projects' build output and
 — confirmed clean (`ls` after `build`, `typecheck`, and `lint` all show no
 stray files) and `.gitignore` updated so this can't silently recur.
 
-**New this phase, in full**: a frontend test runner. There was none —
+**New here, in full**: a frontend test runner. There was none —
 `vitest` + `@testing-library/react` + `jsdom` installed, `vitest.config.ts`
 added, 11 real tests written (§9's `api/client.test.ts` and
 `components/ErrorBoundary.test.tsx`), `npm run test:run` wired in and
 passing.
 
-**New this phase**: `scripts/ci_check.sh`, a single script that installs
+**New here**: `scripts/ci_check.sh`, a single script that installs
 backend deps into a venv, applies migrations to a fresh throwaway SQLite
 file and confirms `alembic check` is clean, runs the full backend test
 suite, runs `pip-audit` (informational), installs frontend deps via `npm
@@ -850,7 +848,7 @@ shutdown) not fixed in this pass; noted here rather than papered over.
 ### Rollback approach
 Every migration in this project has been purely additive (§7) — the schema
 is backward-compatible with the previous code version at every point in
-this project's history, confirmed again this phase. That means "rollback"
+this project's history, confirmed again this layer. That means "rollback"
 in practice is **redeploy the previous container image/code**, not
 `alembic downgrade` — the downgrade scripts Alembic autogenerates do exist
 in each migration file, but have never been exercised or tested in this
@@ -882,7 +880,7 @@ a DR plan dressed up as guaranteed:
 | DB file lost/corrupted | No | No automated backup exists (§7). Recovery = restore from a manual file copy if one was made, or `alembic upgrade head` on a fresh empty file (all data lost). This is a real, unmitigated risk at this project's current scope — stated plainly, not minimized. |
 | Corrupted model/component "artifact" | N/A | There is no artifact file to corrupt (§11) — a `ComponentVersion`'s parameters live in the same DB row as everything else, so this specific failure mode doesn't exist for this system by construction. |
 | Failed deployment (new code crashes on start) | Depends | If the crash is the §2 config guard firing, that's the system working as intended — fix the config and redeploy. If it's a genuine code bug, redeploy the previous image (§17's rollback approach); nothing here auto-rolls-back a bad deploy. |
-| Bad active model/component version activated | Yes, at the data layer | MLOPS_GOVERNANCE.md's rollback endpoint exists precisely for this — an operator action, not automatic, but a real one-call recovery path that predates this phase. |
+| Bad active model/component version activated | Yes, at the data layer | MLOPS_GOVERNANCE.md's rollback endpoint exists precisely for this — an operator action, not automatic, but a real one-call recovery path that predates this layer. |
 | Config error (e.g. wrong `DATABASE_URL`) | Yes, by refusing to start | §2's validator and the pre-existing JWT-length check both fail fast at startup rather than running in a broken state — "auto-recoverable" here means "impossible to silently misrun," not "self-heals." |
 | Background job failure | Partially | The job itself fails explicitly (§6) and its underlying domain row (`ModelRun`/`DatasetBuild`) ends up in a real `FAILED` state — no corrupted intermediate state. Recovery (resubmitting) is a manual/API-triggered action, not automatic. |
 
@@ -959,7 +957,7 @@ commands that were run and their real output, not a simulated report):
    through the actual HTTP API, not direct service calls.
 6. **Trigger background processing** — covered by the pre-existing
    `test_async_batch_ingestion_job_runs_to_completion` (part of the full
-   suite re-run) and this phase's own new job-runner tests (§6/§19),
+   suite re-run) and its own new job-runner tests (§6/§19),
    which run real `asyncio` tasks to real completion/timeout/failure, not
    mocked.
 7. **Inspect structured logs/metrics** — `docker compose config` and the
@@ -1015,7 +1013,7 @@ requests are rejected before doing real work; authorization failures never
 leak partial data.
 
 **Are secrets protected?** Yes for what exists: never committed, never
-logged, never sent to the frontend, and — new this phase — the specific
+logged, never sent to the frontend, and — new this layer — the specific
 "still using the checked-in dev secret" failure mode is now impossible in
 `APP_ENV=production`. Real gap, found and left as a documented limitation
 rather than silently accepted: **no secret rotation mechanism exists** —
@@ -1024,21 +1022,21 @@ no grace period, which is a real operational rough edge for a live
 deployment (not exercised or fixed here; noted honestly).
 
 **Are authorization boundaries enforced?** Yes, server-side, on every
-route checked this phase (`/system/metrics` explicitly tested for both
+route checked this layer (`/system/metrics` explicitly tested for both
 "denied to viewer" and "denied to unauthenticated") — this was already
-true from Phase 1 (`require_roles`/`organization_scope` on every
+true (`require_roles`/`organization_scope` on every
 sensitive route) and reconfirmed rather than newly built.
 
 **Are critical dependencies checked?** Yes — the one real dependency (the
 DB) is checked in readiness, not liveness, correctly.
 
-**Can background failures be understood?** Yes as of this phase's §6
+**Can background failures be understood?** Yes currently's §6
 work — before it, a hung job gave an operator nothing but an indefinitely
 `RUNNING` row with no signal anything was wrong; now it fails explicitly
 with a diagnostic message within a bounded time.
 
 **Are AI-specific failures handled honestly?** Yes, confirmed via §11 —
-this was already this project's strongest area (every prior phase's own
+this was already this project's strongest area (each layer's own
 "honesty over fabrication" discipline), reviewed fresh rather than assumed
 still true.
 
@@ -1074,12 +1072,12 @@ retrospective): the stray `vite.config.js`/`.tsbuildinfo` build-tooling
 bug (§16) and the login timing side-channel (§10) were both found this
 way — by trying to write an honest account of "what does this system
 actually do" and noticing the account didn't match reality, the same
-self-review discipline every prior phase in this project has used to find
+review discipline used throughout this project to find
 at least one real bug rather than declaring the work complete unexamined.
 A smaller instance of the same pattern: `backend/` had four stray
 multi-megabyte SQLite `-wal`/`-shm` files (`demo_e2e.db-wal`,
 `dev_migration_check.db-wal`, and their `-shm` companions) sitting at its
-root — leftovers from earlier phases' own live-validation scripts that
+root — leftovers from earlier work' own live-validation scripts that
 pointed `DATABASE_URL` at a throwaway file outside `backend/data/`, so
 they escaped the existing `.gitignore` pattern. Deleted, and the
 `.gitignore` pattern widened (§7/§16) so a future one-off script can't
@@ -1121,7 +1119,7 @@ Test Files  2 passed (2)
 === ALL CHECKS PASSED ===
 ```
 
-Additionally, specifically for this phase's own new code: the perf
+Additionally, specifically for its own new code: the perf
 profiling script (§14) and the direct `docker compose config` /
 missing-secret checks (§15) were run separately and their real output is
 quoted verbatim in those sections. No test was skipped, no failing test
@@ -1134,12 +1132,12 @@ more.
 
 ---
 
-## §23. Phase 8 addendum — flagship finalization
+## §23. Addendum — flagship finalization
 
-Phase 8 did not change any of the reliability/security work described
+Did not change any of the reliability/security work described
 above (§1–§22 remain accurate as written) — it added documentation
 polish, a final code-quality/UX-consistency audit (no material issues
-found beyond what was already fixed in Phase 7), and one new piece of
+found beyond what was already fixed), and one new piece of
 real evidence: `scripts/e2e_acceptance_test.py`, a full end-to-end
 acceptance test that exercises the complete investigation workflow
 through real HTTP calls (`fastapi.testclient.TestClient`) against the
@@ -1158,13 +1156,13 @@ ALL ACCEPTANCE CHECKS PASSED — real HTTP calls, real seeded database, no simul
 ```
 
 The full validation gate (`scripts/ci_check.sh`) was re-run after all
-Phase 8 documentation and script changes — see the Phase 8 completion
+Documentation and script changes — see the completion
 report for the verbatim final numbers. Nothing in this addendum changes
 any tier classification above.
 
-## §24. Phase 9 addendum — evidence-grounded AI copilot
+## §24. Addendum — evidence-grounded AI copilot
 
-Phase 9 added one new, entirely optional module — the AI copilot
+Added one new, entirely optional module — the AI copilot
 (`app/copilot/`, `app/api/v1/copilot.py`, `app/services/copilot_service.py`)
 — and does not change any reliability/security tier classification in
 §1–§23 above. It is worth stating explicitly why: the copilot has no
@@ -1182,7 +1180,7 @@ call is opt-in per deployment and off by default; it does not appear in
 this repository's dependency graph as a *required* runtime call anywhere.
 
 The full validation gate (`scripts/ci_check.sh`) was re-run after all
-Phase 9 code and documentation changes — 301 backend tests (34 new for
+Code and documentation changes — 301 backend tests (34 new for
 the copilot), 15 frontend tests (4 new for the copilot panel), migrations
 applying cleanly (including `604e27f002c4`), lint/typecheck/build all
 clean. A new live acceptance script,
@@ -1190,7 +1188,7 @@ clean. A new live acceptance script,
 against the real seeded database — including a deliberate insufficient-
 evidence question and a live proof (via a fake provider substituted only
 for that one test) that the grounding safeguard catches a fabricated
-citation and an overclaim through the real API/DB path. See the Phase 9
+citation and an overclaim through the real API/DB path. See the
 completion report and `docs/COPILOT.md` for full detail and the honest
 scope of what was and wasn't validated against a live LLM call.
 
@@ -1207,7 +1205,7 @@ protected (not much, honestly) versus what would need real investment.
 Not a claim that the containerized deployment path has been run
 successfully — §1/§17/§20 all say directly that it hasn't, in this
 environment, and why. Not a security audit by a third party — this is a
-self-review by the same process that wrote the code, with the same blind
+self-review by the author of the code, with the same blind
 spots that implies; real fixes were made (§10, §21) but this is not a
 substitute for independent penetration testing. Not a claim that every
 dependency vulnerability is resolved — §10 lists exactly which aren't and

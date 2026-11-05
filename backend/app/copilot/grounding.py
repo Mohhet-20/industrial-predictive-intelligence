@@ -1,5 +1,5 @@
 """Grounding data model, prompt construction, and the post-generation
-hallucination/overclaim safeguard (Phase 9 §4/§6).
+hallucination/overclaim safeguard.
 
 Core principle enforced here, architecturally rather than by a system
 prompt alone: an assistant answer is only ever built from a bounded list
@@ -13,7 +13,7 @@ this platform never has evidence for) is flagged regardless of citation.
 This is a real, testable safeguard — see tests/test_copilot_grounding.py
 — not just an instruction we hope the model follows.
 
-**Phase 15 addition — input-side sanitization, not just output-side
+**Addition — input-side sanitization, not just output-side
 validation.** A real amount of the evidence this platform retrieves is
 free text a human typed: an investigation annotation (`a.content`), an
 outcome description, a status-change note, a relation note. Any of those
@@ -40,7 +40,7 @@ from typing import Optional
 
 
 class EvidenceCategory:
-    """The five categories this platform's UX has used since Phase 6
+    """The five categories this platform's UX has used
     (IntelligenceWorkspacePage's "Observed data" / "Human interpretation"
     cards) — the copilot must preserve the same distinction, never invent
     a sixth kind of claim."""
@@ -149,7 +149,7 @@ def build_system_prompt(items: list[EvidenceItem]) -> str:
 
 # ---------------------------------------------------------------------------
 # Input-side sanitization — never trust retrieved evidence text either
-# (Phase 15 §10/§G)
+# (/§G)
 # ---------------------------------------------------------------------------
 
 # Phrasing that looks like an attempt to redirect the model's OWN
@@ -208,7 +208,7 @@ def sanitize_evidence_text(text: str) -> tuple[str, bool]:
 
 
 # ---------------------------------------------------------------------------
-# Post-generation safeguard — never trust the system prompt alone (Phase 9 §6)
+# Post-generation safeguard — never trust the system prompt alone
 # ---------------------------------------------------------------------------
 
 _CITATION_RE = re.compile(r"\[E(\d+)\]")

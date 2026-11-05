@@ -1,9 +1,9 @@
-"""API-level tests for the Investigation Workflow layer (Phase 6).
+"""API-level tests for the Investigation Workflow layer.
 
 Mirrors tests/test_api_anomaly.py and tests/test_api_mlops.py's
 conventions: real HTTP surface against the real DB. Covers the workflow
-happy path plus the failure/adversarial paths the spec explicitly asks for
-tested (§17): evidence relationships, provenance preservation (linking
+happy path plus the failure/adversarial paths the design explicitly asks for
+tested: evidence relationships, provenance preservation (linking
 never mutates the underlying evidence), status transitions, human
 annotation separation from verified labels, authorization, and cross-org
 isolation.
@@ -215,7 +215,7 @@ def test_remove_evidence_link(client, auth_headers):
 
 
 # ---------------------------------------------------------------------------
-# Human annotations are kept distinct from verified outcomes (spec §9)
+# Human annotations are kept distinct from verified outcomes
 # ---------------------------------------------------------------------------
 
 
@@ -223,7 +223,7 @@ def test_false_positive_annotation_does_not_change_anomaly_status(client, auth_h
     """Recording a human's false-positive ASSESSMENT as an annotation must
     never, by itself, silently change the underlying Anomaly's status —
     that requires the separate, explicit anomaly review action. This is the
-    concrete behavioral proof of spec §9's "do not automatically treat
+    concrete behavioral proof of's "do not automatically treat
     human notes as verified training labels" requirement."""
     asset, sensor = _make_asset_and_sensor(client, auth_headers)
     anomaly = _make_real_anomaly(client, auth_headers, asset=asset, sensor=sensor)
@@ -278,7 +278,7 @@ def test_related_investigations_visible_symmetrically(client, auth_headers):
     self_link = client.post(f"/api/v1/investigations/{inv_a['id']}/related", headers=auth_headers, json={"related_investigation_id": inv_a["id"]})
     assert self_link.status_code == 422
 
-    # Regression test for a bug found in this phase's self-review: the relation is stored A->B, but when B looks
+    # Regression test for a bug found in code review: the relation is stored A->B, but when B looks
     # up ITS related investigations, the response must be oriented from B's perspective (investigation_id == B,
     # related_investigation_id == A) — not the raw stored direction, which would show B's own id in the "related"
     # slot and mislead a client rendering "investigations related to B".

@@ -6,7 +6,7 @@ app.anomaly.thresholds.validate_threshold_config and
 app.services.anomaly_service, not by the schema layer, so the same
 validation logic runs regardless of caller (API, tests, a future CLI).
 Response schemas are fully typed: every field returned to a client is one
-this phase's spec actually asks for, and nothing here exposes an internal
+the design calls for, and nothing here exposes an internal
 model object (an IsolationForest instance, a pandas DataFrame) — only
 JSON-serializable summaries.
 """

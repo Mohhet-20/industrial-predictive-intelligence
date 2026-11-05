@@ -1,4 +1,4 @@
-# Scenario Simulation & What-If Analysis (Phase 11)
+# Scenario Simulation & What-If Analysis
 
 **THIS IS SCENARIO ANALYSIS, NOT A PERFECT PHYSICAL DIGITAL TWIN.**
 
@@ -16,7 +16,7 @@ persisted into a real `Anomaly`, `DegradationSignal`, or `ForecastRun` row.
 
 This document is the counterpart to `docs/SCIENTIFIC_VALIDATION.md` for this
 one subsystem: it states what was built, exactly what was reused vs. newly
-written, and — per Phase 11 §20 — how the simulation engine's own
+written, and — per — how the simulation engine's own
 correctness was actually tested (not the real detectors it calls, which are
 already evaluated in `docs/SCIENTIFIC_VALIDATION.md` and
 `docs/ANOMALY_DETECTION.md`/`docs/CONDITION_INTELLIGENCE.md`).
@@ -42,7 +42,7 @@ configured scenario means depending on the analyst's assumption, so the two
 are kept as separate types with separate docstrings rather than one type
 with an ambiguous flag.
 
-`missing_data_gap` (Phase 15 Phase H — "missing-data interval") is a
+`missing_data_gap` ("missing-data interval") is a
 deliberate exception to "`magnitude` is a sensor-units value": it is the one
 type where `magnitude` means a `[0, 1]` *fraction of the in-window
 observations to drop*, never a sensor-units amount. `app.simulation.
@@ -116,7 +116,7 @@ multivariate reference data. There is no honest way to substitute one
 perturbed sensor's series into that multivariate feature vector without
 either silently changing what the trained model represents, or fabricating
 how sibling sensors would respond to a hypothesis this platform has no basis
-for — which is exactly the kind of invented sensor relationship Phase 11's
+for — which is exactly the kind of invented sensor relationship the
 governing constraints forbid. This is stated in `app.simulation.pipeline`'s
 module docstring and in `PIPELINE_FUNCTION_PROVENANCE`, which is persisted
 onto every `ScenarioRun.pipeline_versions` so it is inspectable per-run, not
@@ -130,8 +130,7 @@ analytical algorithm was reimplemented, approximated, or forked — see
 mapping persisted with every run.
 
 ## 5. Scientific validation of the simulation engine itself (§20)
-
-Phase 11 §20 asks for validation of the *simulation system*, distinct from
+ asks for validation of the *simulation system*, distinct from
 the real detectors it calls (already evaluated elsewhere). That means: given
 a known, hand-computable input and a declared perturbation, does the engine
 produce the *exact* expected output — not "a plausible-looking one." All 74
@@ -152,7 +151,7 @@ $ pytest tests/test_simulation_perturbations.py tests/test_simulation_validation
 ### 5.1 Exact-value determinism (35 tests, `test_simulation_perturbations.py`)
 
 These are deterministic, hand-computed-expected-value tests — the closest
-equivalent here to Phase 10's "known ground truth" discipline — not
+equivalent here to the "known ground truth" discipline — not
 statistical approximations:
 
 - **`TestLevelShift`** (5 tests): a level shift adds the exact configured
@@ -194,7 +193,7 @@ statistical approximations:
   a negative magnitude is rejected (`test_rejects_negative_magnitude` — a
   variability multiplier cannot invert a deviation's sign without
   fabricating a physical meaning the platform doesn't have).
-- **`TestMissingDataGap`** (7 tests, Phase 15): a full gap (`magnitude=1.0`)
+- **`TestMissingDataGap`** (7 tests): a full gap (`magnitude=1.0`)
   sets every in-window point to NaN
   (`test_full_gap_sets_every_in_window_point_to_nan`); `magnitude=None`
   (what validation alone permits for this type) behaves identically to an
@@ -238,7 +237,7 @@ observed range when a robust std isn't available), too little baseline data
 `temporary_spike` or `missing_data_gap`, and multi-sensor sub-config errors
 (wrong count, wrong scenario type nesting, etc.) — each returning specific,
 numeric error text rather than a generic rejection.
-`TestMissingDataGapValidation` (6 tests, Phase 15) additionally confirms
+`TestMissingDataGapValidation` (6 tests) additionally confirms
 `missing_data_gap`'s `[0, 1]` drop-fraction magnitude is checked against its
 own dedicated bound, not the generic sensor-units one — including the case a
 generic bound would get wrong in either direction: `magnitude=5.0` is small
@@ -270,7 +269,7 @@ sensitivity-sweep magnitude-count bounding, multi-sensor scenario execution
 and the rejection of a single-sensor scenario incorrectly given multiple
 sub-configs, role-based write authorization (403 for `viewer`), and
 cross-organization isolation (404, never a silent empty result).
-`TestMissingDataGapScenario` (3 tests, Phase 15) runs a full
+`TestMissingDataGapScenario` (3 tests) runs a full
 `missing_data_gap` scenario end-to-end and confirms: the simulated bundle's
 `observation_count` is genuinely lower than the baseline's (the gap actually
 removed points from what the pipeline analyzed, not just from a value), the
@@ -374,7 +373,7 @@ trend line is ever fit across them.
   supplied explicitly (as JSON in the current frontend) — there is no UI
   wizard yet for building per-sensor configs field-by-field.
 - Sensitivity sweeps are bounded to 8 magnitude points and to single-sensor
-  scenario types only (§9 of the spec: a multi-sensor sweep would require
+  scenario types only (§9 of the design: a multi-sensor sweep would require
   inventing a combined magnitude, which this platform refuses to do).
 - No scenario has ever been, or can be, validated against a real subsequent
   outcome — there is no ground truth for "did the equipment actually behave

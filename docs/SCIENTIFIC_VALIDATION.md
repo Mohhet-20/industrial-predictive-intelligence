@@ -32,7 +32,7 @@ quoted in this document are from one such real, checked-in run.
 
 Before evaluating anything, every intelligence component was classified
 by what kind of evidence is actually available for it. This audit builds
-directly on the reality audits already performed in Phases 4–9 (§0 of
+directly on the reality audits already performed (§0 of
 each), re-confirmed here specifically for evaluability:
 
 | Component | Evaluability | Why |
@@ -44,15 +44,15 @@ each), re-confirmed here specifically for evaluability:
 | Explainability (per-anomaly explanations) | **FULLY EVALUABLE WITH AVAILABLE DATA** | Explanation numbers can be independently recomputed from raw inputs via a second code path and diffed exactly. |
 | Prioritization / decision support | **FULLY EVALUABLE WITH AVAILABLE DATA** | A deterministic, DB-state-driven function; reproducibility and every named edge case can be tested directly. |
 | Copilot grounding & safeguards | **FULLY EVALUABLE WITH AVAILABLE DATA (mechanism only)** | The retrieval/grounding/safeguard machinery is fully testable; a real LLM's own judgment is **not** evaluated — no `ANTHROPIC_API_KEY` is configured in this environment (see `docs/COPILOT.md`). |
-| Failure prediction | **NOT CURRENTLY EVALUABLE — AND NOT IMPLEMENTED** | Zero failure/maintenance-outcome labels exist in any available dataset (confirmed repeatedly since Phase 4 §0). There is nothing to evaluate because nothing was built to predict failure; see `docs/AI_ML_METHODOLOGY.md` §1. |
+| Failure prediction | **NOT CURRENTLY EVALUABLE — AND NOT IMPLEMENTED** | Zero failure/maintenance-outcome labels exist in any available dataset (confirmed repeatedly since. There is nothing to evaluate because nothing was built to predict failure; see `docs/AI_ML_METHODOLOGY.md` §1. |
 | Real-world detection accuracy (precision/recall against real faults) | **NOT CURRENTLY EVALUABLE** | No labeled real-world anomaly/fault dataset exists. Every precision/recall number in this project is against synthetic, seeded ground truth and is labeled as such everywhere it appears (`is_synthetic: true`). |
 
 ---
 
 ## 1. Temporal validation & leakage audit
 
-This project's leakage-prevention machinery was built in Phase 2 and has
-not been modified since; Phase 10 re-audits and reconfirms it rather than
+This project's leakage-prevention machinery was built and has
+not been modified since; this validation re-audits and reconfirms it rather than
 rebuilding it:
 
 - **Splitting** (`app.timeseries.splitting`): every `ChronologicalSplit` /
@@ -77,7 +77,7 @@ rebuilding it:
   `MIN_IMPROVEMENT_FRACTION = 0.10` gate before `linear_trend` is ever
   labeled "justified" over a baseline.
 
-No new leakage defect was found in this pass. What Phase 10 added on top
+No new leakage defect was found in this pass. What added on top
 is the robustness/boundary sweep suite in §5 below, which stresses these
 same code paths under adversarial data conditions rather than re-deriving
 the leakage guarantee itself.
@@ -86,7 +86,7 @@ the leakage guarantee itself.
 
 ## 2–3. Anomaly detection & forecasting evaluation
 
-Both already had a real, working evaluation harness before Phase 10:
+Both already had a real, working evaluation harness:
 
 - `app.anomaly.evaluation` + `app.anomaly.synthetic_scenarios`: deterministic,
   seeded precision/recall/F1 against seven synthetic scenarios (point
@@ -102,9 +102,9 @@ Both already had a real, working evaluation harness before Phase 10:
   justification gate described above — see `docs/CONDITION_INTELLIGENCE.md`
   §3.
 
-Phase 10 does not re-litigate these (they were already built correctly
+Does not re-litigate these (they were already built correctly
 and are already tested); §5–§10 below are the genuinely new evaluation
-surface this phase adds.
+surface this layer adds.
 
 ---
 
@@ -321,19 +321,17 @@ accurate," "production-proven," "AI detects equipment problems,"
 accuracy, "state-of-the-art," fabricated "health score" language) — found
 **no unsupported claims requiring correction**. Every match on these terms
 across the codebase was already in *disclaiming* form (e.g.
-`docs/PORTFOLIO_NARRATIVE.md`: "it doesn't predict failures... every
-technical document in this repo says so explicitly and repeatedly";
 `ConditionPage.tsx`: "There is no single blended 'health score' anywhere
 in this platform"). This reflects the scientific-claims discipline already
-established in Phase 8 §14's own audit, carried forward consistently
-through Phases 9 and 10 rather than drifting as new features were added.
+established in's own audit, carried forward consistently
+through and 10 rather than drifting as new features were added.
 This is itself a real, checked result — not an assumption — from a real
 search executed as part of this evaluation, and it is reported here
 including the possibility it could have found something (it did not).
 
 ## 15. Evaluation test suite
 
-New test files added for Phase 10, testing evaluation *methodology*
+New test files added, testing evaluation *methodology*
 correctness (not just that a number comes out):
 
 | File | Tests | Status |
@@ -394,7 +392,7 @@ Read against a skeptical reviewer's checklist:
 - `./scripts/ci_check.sh` (backend + frontend): re-run, green.
 - `scripts/run_evaluation.py`: re-run, exit 0 (three consecutive runs).
 - `scripts/e2e_acceptance_test.py`, `scripts/e2e_copilot_acceptance_test.py`:
-  unaffected by Phase 10's changes (no core service behavior changed
+  unaffected by the changes (no core service behavior changed
   except the copilot evidence-text fix, which only *adds* a caveat
   sentence and cannot break existing assertions on evidence structure) —
   re-run as part of the final delivery gate.

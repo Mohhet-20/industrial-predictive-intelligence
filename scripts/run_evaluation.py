@@ -1,8 +1,8 @@
-"""Phase 10 §11 — Reproducible evaluation pipeline.
+"""Reproducible evaluation pipeline.
 
 Runs every app.evaluation.* module and writes ONE fixed-name JSON artifact
 plus ONE fixed-name Markdown summary (overwritten each run, not
-accumulated — Phase 10 §11 asks for "clear commands... not huge
+accumulated — asks for "clear commands... not huge
 committed artifacts"). This is the single command that reproduces every
 number cited in docs/SCIENTIFIC_VALIDATION.md.
 
@@ -92,7 +92,7 @@ def _run_db_backed_sections(run_started_at: str) -> tuple[dict, list[str]]:
 
 def main() -> int:
     run_started_at = datetime.now(timezone.utc).isoformat()
-    print(f"=== Phase 10 evaluation pipeline — started {run_started_at} ===\n")
+    print(f"=== Evaluation pipeline — started {run_started_at} ===\n")
 
     print("[1/6] app.evaluation.robustness (pure, seed=42)...")
     robustness_result = robustness.run_all()

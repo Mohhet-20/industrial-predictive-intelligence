@@ -1,7 +1,6 @@
 # Anomaly Detection Intelligence — What This Layer Does and Doesn't Do
 
-Status: **Phase 3 — Advanced Anomaly Detection Intelligence, Evaluation &
-Investigation.** This describes what is actually implemented, run, and
+This describes what is actually implemented, run, and
 tested today. It is explicitly NOT a predictive-maintenance system — see
 "What this is not" at the bottom, and `docs/TEMPORAL_INTELLIGENCE.md` for
 the layer this one builds directly on.
@@ -17,9 +16,9 @@ exists to capture.
 
 ## 0. What this builds on, and the truth audit that preceded it
 
-Before writing any detection code, the actual state of Phases 1 and 2 was
+Before writing any detection code, the actual state and 2 was
 re-verified by reading the code and running the existing test suite (138
-tests, all passing at the start of this phase) rather than trusting prior
+tests, all passing at the outset) rather than trusting prior
 completion reports. What was confirmed real and reused directly:
 
 - `app/timeseries/data_access.py` — bounded, organization-scoped raw
@@ -62,7 +61,7 @@ this detector consistently misses.
 **Isolation Forest** (`app/anomaly/isolation_forest_detector.py`, via
 `sklearn.ensemble.IsolationForest`) — an unsupervised ML method operating
 on rolling-window FEATURES (mean/std/rate-of-change per sensor, from
-Phase 2's feature layer), not raw values. Chosen because it makes no
+the feature layer), not raw values. Chosen because it makes no
 distributional assumption, handles multivariate input natively (its
 "multivariate mode" concatenates each configured sensor's features into
 one wide vector per grid point, so it can learn cross-sensor relationships
@@ -72,7 +71,7 @@ platform's data volumes. It is explicitly NOT a deep-learning model —
 nothing about a few thousand feature rows per sensor justifies one, and
 depth here would be complexity for appearance, not for the data.
 
-## 1a. A third detector, added in Phase 14: Mahalanobis distance (robust covariance)
+## 1a. A third detector, added: Mahalanobis distance (robust covariance)
 
 **Mahalanobis distance** (`app/anomaly/mahalanobis_detector.py`, via
 `sklearn.covariance.MinCovDet`) — closes a specific, real gap neither
@@ -130,7 +129,7 @@ re-fits the model fresh from that immutable config with a fixed
 `random_state=42`. Since the underlying raw measurements never change,
 this reproduces an identical model deterministically without the security
 and complexity cost of deserializing pickled sklearn objects — the same
-"recompute on demand" pattern Phase 2's `DatasetBuild` already uses for
+"recompute on demand" pattern the `DatasetBuild` already uses for
 its feature matrix.
 
 ## 2. Baseline / "normal behavior" methodology
@@ -186,7 +185,7 @@ score's magnitude sits past its own detector's threshold:
 (≥ 1.8× threshold, configurable). Defaults per detector type
 (`DETECTOR_DEFAULT_THRESHOLD`: 3.5 robust standard deviations for
 robust z-score, 0.15 for the negated Isolation Forest decision function,
-4.0 robust Mahalanobis distance units for the Phase 14 addition)
+4.0 robust Mahalanobis distance units addition)
 are declared constants, not tuned magic numbers, and are overridable per
 detector at training time. No color, no "risk score," no incident is
 created purely from a detection — flagging is separate from the human
@@ -217,7 +216,7 @@ before and after two review transitions.
 ## 6. Multi-method intelligence — no fake super-score
 
 When multiple detectors — any combination of robust z-score, Isolation
-Forest, and (Phase 14) Mahalanobis distance — are trained against the
+Forest, and Mahalanobis distance — are trained against the
 same sensor(s), their results are shown side by side (same
 `/anomaly/anomalies` list, filterable, each carrying its own
 `detector_type`) — never merged into one combined score. Agreement or
@@ -240,7 +239,7 @@ cards — see §16.
 
 ## 8. Multi-sensor context — association, not causation
 
-Isolation Forest's multivariate mode and the Phase 14 Mahalanobis
+Isolation Forest's multivariate mode and the Mahalanobis
 detector are the two places multiple sensors feed one detection. Isolation
 Forest's `contributing_features` explanation shows each input feature's
 own deviation from the reference period (§9) — this is still per-feature
@@ -249,7 +248,7 @@ another's. The Mahalanobis detector's `explanation.caveat` field states
 the same thing even more explicitly, every time: a high joint distance is
 a statistical association measure and never identifies which sensor, if
 any, is physically at fault. `app/timeseries/multi_sensor.py`'s existing
-correlation caveat (Phase 2) applies to both without modification:
+correlation caveat applies to both without modification:
 nothing in this codebase computes or claims a causal relationship between
 sensors.
 
@@ -270,7 +269,7 @@ detector's own math, never a templated-sounding LLM-style narrative:
   docstring says so directly) — sklearn's `IsolationForest` has no
   built-in per-feature attribution, and this is not represented as
   SHAP-quality attribution.
-- **Mahalanobis** (Phase 14): `contributing_sensors` — every input
+- **Mahalanobis**: `contributing_sensors` — every input
   sensor's own univariate robust z-score (median/MAD, computed from the
   SAME reference period the covariance was fit on), sorted by `|z|`, plus
   an explicit `individually_unremarkable` boolean (true when every
@@ -285,7 +284,7 @@ approximation or association measure, not a causal or SHAP-quality claim.
 ## 10. Data quality and confidence — never a fabricated percentage
 
 Every `Anomaly` carries `data_quality_context` — observation count, gap
-count, missing fraction, and any Phase-1 data-quality warnings for its
+count, missing fraction, and any original data-quality warnings for its
 specific window (`anomaly_service._data_quality_context`, reusing
 `app.timeseries.profiling.compute_profile`). Nowhere does this system
 invent a numeric "confidence: 87%" — the `data_quality_gap` synthetic
@@ -300,7 +299,7 @@ invented number.
 
 Training a detector always creates a new `ModelVersion` row —
 `version = 1 + max(existing version for this org+name)`, the same
-immutable-version pattern Phase 2 established for `FeatureDefinition`.
+immutable-version pattern established for `FeatureDefinition`.
 Retraining never overwrites a prior version in place, so an `Anomaly`
 referencing an old `model_run_id` → `ModelVersion` keeps meaning exactly
 what it meant when it was detected, permanently. `ModelVersionStatus`
@@ -312,11 +311,11 @@ than a `500` or a silently-broken detector — see
 
 ## 12. Evaluation methodology — and why it's synthetic, not "accuracy"
 
-**No labeled real fault data exists for this platform.** The Phase-1
+**No labeled real fault data exists for this platform.** The original
 demo dataset's injected spikes/step-changes are not annotated ground
 truth (see `docs/SYNTHETIC_DATA.md`), and the real seeded dataset used in
 end-to-end validation below has no maintenance records or confirmed-fault
-labels at all. Per this phase's own requirement, that means no precision/
+labels at all. By design, that means no precision/
 recall/accuracy claim is fabricated against real data.
 
 What IS computed, honestly: `app/anomaly/synthetic_scenarios.py` generates
@@ -409,7 +408,7 @@ JSON-serializable fields the Pydantic response schemas
 
 ## 15. Background jobs
 
-Detection runs follow the identical sync/async split Phase 2 established
+Detection runs follow the identical sync/async split established
 for dataset builds (`app.services.feature_service.create_dataset_build`):
 an estimated row count under `MAX_DETECTION_ROWS_SYNC = 3000` runs inline
 in the request; larger windows are submitted to the existing
@@ -424,18 +423,18 @@ try/except in `execute_detection_run`, which rolls back, marks the run
 `BackgroundJob` row is independently marked failed too).
 Detector *training* stays synchronous — computing a reference baseline or
 feature summary over a bounded reference period is fast enough not to
-need the job runner, mirroring how Phase 2 keeps feature-definition
+need the job runner, mirroring how keeps feature-definition
 creation synchronous.
 
 ## 16. Frontend — Anomaly Intelligence page
 
 `frontend/src/pages/IntelligencePage.tsx` (routed at `/intelligence`,
-replacing the Phase-1/2 "not yet available" placeholder) is a single
+replacing the original "not yet available" placeholder) is a single
 page covering: a live monitoring strip (trained/failed detector counts,
 run outcomes, severity breakdown, "awaiting review" count — real numbers
 from `GET /monitoring`, refetched every 15s); a detector table with an
 inline "train new detector" form (asset → sensor selection, method —
-robust z-score, Isolation Forest, or, as of Phase 14, Mahalanobis
+robust z-score, Isolation Forest, or, Mahalanobis
 distance, with the sensor picker switching to multi-select and a grid-
 step control for both multivariate methods — reference window) and
 per-detector "run detection" / "evaluate" actions
@@ -480,7 +479,7 @@ monitoring foundation, not a fabricated enterprise dashboard.
 ## 19. Tests
 
 172 backend tests pass as of this writing (`cd backend && pytest`): 138
-carried over from Phases 1–2, plus:
+carried over, plus:
 
 - `tests/test_anomaly_detection_core.py` (22 tests) — pure-function tests
   against `app/anomaly/*` with no DB: baseline construction (including
@@ -509,7 +508,7 @@ not just documented.
 
 ## 20. Performance and scalability — known, stated limits
 
-- Detection scoring is bounded the same way Phase 2's dataset builds
+- Detection scoring is bounded the same way the dataset builds
   are: `TooManyObservationsError` / `MAX_DETECTION_ROWS_SYNC` prevent an
   unbounded in-request computation; anything larger moves to the
   background job runner rather than blocking a request thread.
@@ -528,10 +527,10 @@ not just documented.
   `GROUP BY` aggregate queries per call — fine at this platform's current
   row counts, but would need pagination or time-windowing if a single
   organization accumulated a very large number of runs.
-- The `in-process` job runner (Phase 1's choice, reused unchanged here)
+- The `in-process` job runner (the choice, reused unchanged here)
   means job state lives only in this process's database and does not
   survive a process restart mid-job — documented already in
-  `app/jobs/runner.py` and unchanged by this phase.
+  `app/jobs/runner.py` and unchanged.
 
 ## 21. Known limitations (stated plainly)
 
@@ -552,14 +551,14 @@ not just documented.
 - Detector training does not currently run on the background job runner
   (only detection runs do) — acceptable at today's reference-period sizes,
   stated as a scale limit rather than hidden.
-- The Mahalanobis detector (Phase 14) assumes the sensors' joint
+- The Mahalanobis detector assumes the sensors' joint
   relationship is approximately stable and elliptical, is bounded to 6
   sensors (a covariance fit on more dimensions than this platform's
   realistic reference window sizes support is not reliable), and — like
   every other claim in §21 — has no real-world accuracy evidence, only
   the synthetic pipeline-correctness evidence in §22.
 
-## 22. Phase 14 addendum — Mahalanobis detector, actually executed evidence
+## 22. Addendum — Mahalanobis detector, actually executed evidence
 
 Everything in §1a is backed by tests that were actually run, not just
 written:
@@ -622,7 +621,7 @@ remains an empty, unused table — deliberately not repurposed for anomaly
 scores, so the two concepts never get conflated in the schema — and
 `GET /api/v1/intelligence/predictions` still honestly returns
 `501 not_yet_available`. Forecasting a future failure or estimating
-remaining useful life needs validated labels and a methodology this phase
+remaining useful life needs validated labels and a methodology this layer
 does not have and does not fabricate; that is explicitly reserved for a
-future phase, contingent on real label/methodology validation, not on
+later work, contingent on real label/methodology validation, not on
 simply extending this anomaly-scoring layer.

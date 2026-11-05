@@ -1,5 +1,5 @@
 """Pydantic schemas for the Condition Intelligence & Forecasting API
-(Phase 4). Mirrors app.schemas.anomaly's conventions: loose `dict[str,
+. Mirrors app.schemas.anomaly's conventions: loose `dict[str,
 Any]` payloads for evidence/evaluation bundles (validated by
 app.condition.* and app.services.condition_service, not the schema layer),
 fully typed response models for everything returned to a client."""

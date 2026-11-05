@@ -1,6 +1,6 @@
-"""Copilot structured evaluation (Phase 10 §9).
+"""Copilot structured evaluation.
 
-Phase 9's own test suite (tests/test_api_copilot.py, tests/test_copilot_grounding.py,
+the own test suite (tests/test_api_copilot.py, tests/test_copilot_grounding.py,
 tests/test_copilot_provider.py) already exhaustively unit/API-tests each MECHANISM
 (citation stripping, overclaim flagging, org isolation, provider error handling).
 This module is a different thing: a fixed battery of REPRESENTATIVE end-to-end

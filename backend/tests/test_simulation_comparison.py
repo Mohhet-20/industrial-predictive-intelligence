@@ -1,4 +1,4 @@
-"""Unit tests for app.simulation.comparison (Phase 11 §5, §8, §9) — pure
+"""Unit tests for app.simulation.comparison — pure
 diffing over already-computed pipeline bundles. Confirms no combined score
 is ever fabricated and that a "not computed on one side" bundle degrades
 to an honest, explained non-comparison rather than a crash or a fake 0."""

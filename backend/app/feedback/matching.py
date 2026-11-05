@@ -13,7 +13,7 @@ module only ever computes from values the caller already froze and passes in
 explicitly.
 
 Three distinct clocks matter here, and conflating any two of them is exactly
-what this module exists to prevent (Phase 15 Phase I):
+what this module exists to prevent:
 
   - `outcome_timestamp` — when the real-world event itself occurred, as the
     reporting human states it. This can be backdated (someone reports today
@@ -134,7 +134,7 @@ def evaluation_run_leakage_check(
     Three leakage shapes are checked, all explicit, named integrity
     failures rather than a vague "something's off" warning. The first two
     are about the real-world event itself; the third is about when the
-    PLATFORM learned of it — a distinct clock (Phase 15 Phase I: "time an
+    PLATFORM learned of it — a distinct clock ("time an
     event occurred" vs. "time it became known to the platform" must be
     distinguishable, because a human can truthfully report, today, that
     something happened last week — the event's own timestamp alone cannot

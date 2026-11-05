@@ -6,7 +6,7 @@ using plain in-memory counters guarded by a lock (FastAPI sync `def` routes
 run on a worker threadpool, so this genuinely needs thread-safety, unlike
 most of this codebase's async-only state).
 
-Explicit scope, documented rather than oversold (see §12 of
+Explicit scope, documented rather than oversold (see of
 docs/RELIABILITY_AND_OPERATIONS.md): per-process, in-memory, reset on
 restart, not persisted, not aggregated across multiple processes/replicas.
 That is an honest description of what an in-process counter can be, not a

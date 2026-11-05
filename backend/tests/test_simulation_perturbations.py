@@ -1,4 +1,4 @@
-"""Unit tests for app.simulation.perturbations (Phase 11 §19, §20).
+"""Unit tests for app.simulation.perturbations.
 
 These are the SCIENTIFIC VALIDATION tests for the simulation engine
 itself: deterministic scenarios with known expected behavior. A level

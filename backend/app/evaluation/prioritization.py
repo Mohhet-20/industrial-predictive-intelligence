@@ -1,4 +1,4 @@
-"""Prioritization validation (Phase 10 §8).
+"""Prioritization validation.
 
 app.services.orchestration_service.get_prioritized_signals is a pure
 read-plus-arithmetic function over real evidence tables (see that module's
@@ -11,7 +11,7 @@ adds what that suite does not:
 1. An explicit REPRODUCIBILITY check: identical DB state must produce a
    byte-identical ranking across repeat calls (a prerequisite for
    "trustworthy enough to triage from").
-2. The five named edge cases from Phase 10 §8: strong anomaly + poor data
+2. The five named edge cases from: strong anomaly + poor data
    quality, multiple weak signals, conflicting detectors, no available
    signals, stale evidence — each built from real ORM rows (same
    direct-insert pattern tests/test_api_orchestration.py's

@@ -31,7 +31,7 @@ export default [
       // written to opt into the Compiler. This app targets plain React 18
       // and predates that ruleset; enabling it wholesale would demand a
       // structural rewrite of already-validated, working components for
-      // rules unrelated to this phase's actual scope (reliability/
+      // rules unrelated to this layer's actual scope (reliability/
       // security). Keep the two rules that matter for a non-Compiler React
       // 18 app: rules-of-hooks (a real correctness rule — calling hooks
       // conditionally is a genuine bug) and exhaustive-deps (the

@@ -37,7 +37,7 @@ window (default 21 days). Each sensor's series combines:
   annotated as "this is a bearing failure" anywhere, and nothing in this
   codebase claims they represent one. No `Anomaly` rows are created by the
   generator; that table is populated only once real detection logic exists
-  (a later phase).
+  (later work).
 - **Not validated against any real failure mode.** Anyone using this to
   demo or test predictive-maintenance concepts should treat the data as a
   plausible shape for exercising the pipeline, not as ground truth about

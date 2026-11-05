@@ -1,4 +1,4 @@
-"""Explainability validation (Phase 10 §7).
+"""Explainability validation.
 
 The question this module answers is not "does the explanation code look
 reasonable" (already reviewed and documented — see docs/ANOMALY_DETECTION.md's

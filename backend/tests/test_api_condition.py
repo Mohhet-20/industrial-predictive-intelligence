@@ -1,5 +1,5 @@
 """API-level tests for Equipment Condition Intelligence & Forecasting
-(Phase 4) — exercises the real HTTP surface against the real DB, mirrors
+ — exercises the real HTTP surface against the real DB, mirrors
 tests/test_api_anomaly.py's conventions. Deliberately includes refusal/
 honesty paths (insufficient data, non-justified forecast blocking a run,
 mandatory validation notes, invalid stage/status transitions, cross-org
@@ -63,7 +63,7 @@ def _viewer_headers(db_session, org, auth_service_module):
 
 
 # ---------------------------------------------------------------------------
-# Condition evidence (§2) — stateless, no composite score
+# Condition evidence — stateless, no composite score
 # ---------------------------------------------------------------------------
 
 
@@ -100,7 +100,7 @@ def test_condition_evidence_cross_org_isolation(client, auth_headers, db_session
 
 
 # ---------------------------------------------------------------------------
-# Degradation analysis runs & signals (§3, §12) — full lifecycle
+# Degradation analysis runs & signals — full lifecycle
 # ---------------------------------------------------------------------------
 
 
@@ -237,7 +237,7 @@ def test_viewer_cannot_review_or_validate_signals(client, auth_headers, db_sessi
 
 
 # ---------------------------------------------------------------------------
-# Forecasting (§4) — honesty-gated fit + run
+# Forecasting — honesty-gated fit + run
 # ---------------------------------------------------------------------------
 
 
@@ -311,7 +311,7 @@ def test_forecast_model_insufficient_data_reports_failed_honestly(client, auth_h
 
 
 # ---------------------------------------------------------------------------
-# Attention list (§11) & monitoring (§16)
+# Attention list & monitoring
 # ---------------------------------------------------------------------------
 
 

@@ -1,4 +1,4 @@
-"""Pydantic schemas for the Scenario Simulation API (Phase 11). Mirrors
+"""Pydantic schemas for the Scenario Simulation API. Mirrors
 app.schemas.condition's conventions: loose `dict[str, Any]` for
 validation/results payloads (validated by app.simulation.* and
 app.services.scenario_service, not the schema layer), fully typed response

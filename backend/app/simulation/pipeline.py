@@ -1,5 +1,5 @@
 """Runs the SAME analytical pipeline on simulated data that production
-runs on real data (Phase 11 §6) — feature/trend computation, anomaly
+runs on real data — feature/trend computation, anomaly
 detection, condition evidence, degradation classification, change-candidate
 detection, and (when enough data exists) forecast backtesting.
 

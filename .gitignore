@@ -9,7 +9,7 @@ backend/data/*.db-shm
 !backend/data/.gitkeep
 backend/.env
 backend/.pytest_cache/
-# Phase 7 cleanup: earlier ad-hoc validation runs (live_validate_*.py-style
+# Cleanup: earlier ad-hoc validation runs (live_validate_*.py-style
 # scripts, `alembic check` dry runs against a scratch DB) sometimes point
 # DATABASE_URL at a throwaway *.db file created directly under backend/
 # instead of backend/data/ — the pattern above only covers the latter.
@@ -26,7 +26,7 @@ backend/*.db-shm
 frontend/node_modules/
 frontend/dist/
 frontend/.env
-# Phase 7 fix: tsconfig.node.json used to emit vite.config.js + two
+# Fix: tsconfig.node.json used to emit vite.config.js + two
 # .tsbuildinfo files straight into frontend/ on every build (see that
 # file's own comment) — now routed here instead.
 frontend/.ts-build-cache/

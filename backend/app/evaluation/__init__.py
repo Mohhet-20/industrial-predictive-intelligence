@@ -1,4 +1,4 @@
-"""Scientific evaluation & validation framework (Phase 10).
+"""Scientific evaluation & validation framework.
 
 Every module here MEASURES the actual behavior of real, already-built
 Project 5 code (app.anomaly.*, app.condition.*, app.services.*,

@@ -1,10 +1,10 @@
-"""Non-destructive scenario perturbations (Phase 11 §1, §4).
+"""Non-destructive scenario perturbations.
 
 Six scenario types, each a PURE function: `series in -> new series out`.
 None of these ever mutates its input `pd.Series` (every function returns a
 fresh copy) and none of them uses randomness — every perturbation is a
 deterministic function of the real observed values, the real timestamps,
-and the caller's explicit config. That means reproducibility (§4, §11) is
+and the caller's explicit config. That means reproducibility is
 free: the same (series, config) always produces byte-identical output, on
 any machine, forever — there is no seed to record because there is nothing
 stochastic to seed.
@@ -24,7 +24,7 @@ scenario that wants a change to persist for the rest of the analyzed
 window simply leaves modification_duration_seconds unset (or sets it to
 span the remaining window) rather than relying on any special-cased
 "permanent" behavior. This single, exception-free rule is what makes the
-non-destructive guarantee (§19/§20) simple to state, simple to verify, and
+non-destructive guarantee simple to state, simple to verify, and
 impossible to get subtly wrong for one type but not another.
 
 Also guaranteed:
@@ -161,7 +161,7 @@ def apply_temporary_spike(
 ) -> pd.Series:
     """Adds a bounded bump of peak height `magnitude` entirely within
     [modification_start, modification_start + duration] — outside that
-    window, every value is byte-identical to the input (§1: "a temporary
+    window, every value is byte-identical to the input (: "a temporary
     spike affects only its declared window"). `shape="rectangular"` adds
     the full magnitude for the whole window; `shape="triangular"` ramps
     linearly up to `magnitude` at the window's midpoint and back down to 0
@@ -227,7 +227,7 @@ def apply_missing_data_gap(
     """Sets observations within [modification_start, modification_end] to
     NaN ("this sensor stopped reporting for a while") rather than changing
     their values — the one perturbation type that removes data instead of
-    distorting it (Phase 15 Phase H: "missing-data interval").
+    distorting it ("missing-data interval").
 
     `magnitude` means something different here than for every other
     perturbation: it is a DROP FRACTION in [0, 1] of the real observations
@@ -301,7 +301,7 @@ def apply_perturbation(series: pd.Series, *, scenario_type: str, modification_st
 
 
 def verify_outside_window_unchanged(original: pd.Series, simulated: pd.Series, *, modification_start: datetime, modification_end: Optional[datetime]) -> bool:
-    """Non-destructive-guarantee check (§19/§20): every timestamp strictly
+    """Non-destructive-guarantee check: every timestamp strictly
     outside the declared modification window must be numerically identical
     between `original` and `simulated`. Used by tests, and by
     app.simulation.pipeline as a defensive assertion before a result is

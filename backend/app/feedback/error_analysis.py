@@ -2,8 +2,8 @@
 false-negative candidates.
 
 Every finding in this module is framed explicitly as a *candidate* for a
-human to review — never as an automatically asserted root cause (Phase 12
-§9/§15: "do not automatically infer root cause"). A `FalseNegativeCandidate`
+human to review — never as an automatically asserted root cause (by design:
+"do not automatically infer root cause"). A `FalseNegativeCandidate`
 is a flag, not an accusation that detection failed.
 """
 from __future__ import annotations

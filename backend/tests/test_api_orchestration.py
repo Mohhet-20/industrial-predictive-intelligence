@@ -1,4 +1,4 @@
-"""API-level tests for the Intelligence Orchestration layer (Phase 6):
+"""API-level tests for the Intelligence Orchestration layer:
 unified timeline, evidence-based prioritization, cross-layer asset
 summary, cross-sensor context, and evidence provenance.
 
@@ -108,7 +108,7 @@ def _make_data_quality_issue(db_session, *, organization_id, asset_id, sensor_id
 
 
 # ---------------------------------------------------------------------------
-# §3 — Unified timeline
+# — Unified timeline
 # ---------------------------------------------------------------------------
 
 
@@ -189,7 +189,7 @@ def test_timeline_rejects_invalid_range_and_unknown_asset(client, auth_headers):
 
 
 # ---------------------------------------------------------------------------
-# §4 — Evidence-based prioritization
+# — Evidence-based prioritization
 # ---------------------------------------------------------------------------
 
 
@@ -237,7 +237,7 @@ def test_prioritized_signals_is_organization_scoped(client, auth_headers, db_ses
 
 
 # ---------------------------------------------------------------------------
-# §5 — Cross-layer asset intelligence summary
+# — Cross-layer asset intelligence summary
 # ---------------------------------------------------------------------------
 
 
@@ -273,7 +273,7 @@ def test_asset_summary_not_found(client, auth_headers):
 
 
 # ---------------------------------------------------------------------------
-# §8 — Cross-sensor context (non-causal language)
+# — Cross-sensor context (non-causal language)
 # ---------------------------------------------------------------------------
 
 
@@ -314,7 +314,7 @@ def test_cross_sensor_context_uses_non_causal_language_and_real_correlation(clie
 
 
 # ---------------------------------------------------------------------------
-# §11 — Evidence provenance
+# — Evidence provenance
 # ---------------------------------------------------------------------------
 
 

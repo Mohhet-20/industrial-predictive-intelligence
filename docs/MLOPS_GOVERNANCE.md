@@ -1,6 +1,6 @@
 # Intelligence Lifecycle, Registry & Governance (MLOps) — What This Layer Does and Doesn't Do
 
-Phase 5 builds the layer that manages every intelligence capability Phases
+Builds the layer that manages every intelligence capability Phases
 1-4 actually built: a stable registry, an explicit lifecycle (train →
 evaluate → validate → approve → activate → retire), append-only governance
 history, controlled retraining, data/feature shift analysis, and a safe
@@ -19,22 +19,22 @@ platform's own principle — "manage what actually exists" — meant this
 table had to come first and the architecture had to fit it, not the other
 way around.
 
-| Component | Type | Trainable? | Current versioning (pre-Phase 5) | Input data | Feature dependencies | Output type | Evaluation status | Validation evidence | Deployment/runtime status |
+| Component | Type | Trainable? | Current versioning (original) | Input data | Feature dependencies | Output type | Evaluation status | Validation evidence | Deployment/runtime status |
 |---|---|---|---|---|---|---|---|---|---|
 | Robust z-score detector (`app.anomaly.robust_zscore`) | Statistical detector | Non-trainable — closed-form median/MAD, no iterative fitting | `ModelVersion`, per-(org, name) auto-increment, immutable | One sensor's raw measurement series | None (raw values only) | Per-point anomaly candidates (raw/normalized score, severity tier) | Optional: `POST /anomaly/detectors/{id}/evaluate` against synthetic scenarios, `is_synthetic=true` | None — any `TRAINED` version was directly scorable | Synchronous; no "current/active" concept — every `model_version_id` usable forever |
 | Isolation Forest detector (`app.anomaly.isolation_forest_detector`) | **Trained ML model** — a real `sklearn.IsolationForest` fit in this codebase | Trainable — refit deterministically each run (`random_state=42`) from immutable stored config; never pickled/persisted | `ModelVersion`, same pattern | 1+ sensor series | `app.timeseries.dataset_builder` feature specs (mean/std/rate_of_change, window_seconds) | Per-grid-point candidates with `contributing_features` | Same synthetic harness | None | Sync or async (`JobType.ANOMALY_DETECTION_RUN`) depending on `MAX_DETECTION_ROWS_SYNC` |
-| Mahalanobis (robust covariance) detector (`app.anomaly.mahalanobis_detector`) — **added Phase 14** | **Trained ML model** — a real `sklearn.covariance.MinCovDet` fit in this codebase | Trainable — refit deterministically each run (`random_state=42`) from immutable stored reference-period data; never pickled/persisted | `ModelVersion`, same pattern, same `TRAINED_ML_MODEL` component type as Isolation Forest | 2-6 sensor series aligned onto one grid (`align_sensors_on_grid`) | None (raw aligned values; no feature engineering step) | Merged per-event candidates with per-sensor `contributing_sensors` and an `individually_unremarkable` flag | Same synthetic harness, via a dedicated multivariate scenario generator (`app.anomaly.multivariate_synthetic_scenarios`) — single-sensor scenarios cannot exercise a relationship-breakdown detector | None | Sync or async, identical split to Isolation Forest |
+| Mahalanobis (robust covariance) detector (`app.anomaly.mahalanobis_detector`) — **added** | **Trained ML model** — a real `sklearn.covariance.MinCovDet` fit in this codebase | Trainable — refit deterministically each run (`random_state=42`) from immutable stored reference-period data; never pickled/persisted | `ModelVersion`, same pattern, same `TRAINED_ML_MODEL` component type as Isolation Forest | 2-6 sensor series aligned onto one grid (`align_sensors_on_grid`) | None (raw aligned values; no feature engineering step) | Merged per-event candidates with per-sensor `contributing_sensors` and an `individually_unremarkable` flag | Same synthetic harness, via a dedicated multivariate scenario generator (`app.anomaly.multivariate_synthetic_scenarios`) — single-sensor scenarios cannot exercise a relationship-breakdown detector | None | Sync or async, identical split to Isolation Forest |
 | Linear-trend forecaster (`app.condition.forecasting`) | Forecasting model | Trainable in a closed-form sense (OLS fit, not iterative) | `ForecastModel`, same per-(org, name) pattern | One sensor series, fit/test windows | None (raw values + time index) | Forecast points with uncertainty bounds | **Always** backtested inline against `naive_last_value`/`seasonal_naive`; `JUSTIFIED` only if it beats both by ≥10% MAE | The backtest itself, but no human sign-off existed | Synchronous; gated — `POST .../runs` refuses unless `status=justified` |
 | Degradation classification (`app.condition.degradation`) | Heuristic signal method | Non-trainable — fixed constants (`SUB_WINDOW_COUNT=3`, `CORROBORATION_MAD_THRESHOLD=2.0`) | None — pure code, no version row at all | One sensor series split into 3 sub-windows | Reuses `app.timeseries.profiling`'s OLS trend | Stage classification; `validated_degradation` only via explicit human action | Only `tests/test_condition_core.py` (18 tests) — no formal evaluation harness | Human validation exists per-signal (`validate_degradation_signal`), never per-method-version | Always active; no method-level versioning |
 | Change-candidate detection (`app.timeseries.change_detection`) | Heuristic signal method | Non-trainable | None | One sensor series | None | Variance/mean-shift candidates | `tests/test_change_detection.py` unit tests only | None | Invoked inline by Temporal Analysis and Condition Evidence; no lifecycle concept |
 | Condition evidence bundle (`app.condition.evidence`) | Orchestration/assembler, not independently trainable | N/A | N/A | Composite of the above | N/A | Five independent evidence types, `composite_score: null` | N/A | N/A | Not independently registrable — it composes other components, so it is out of scope for individual registry entries |
-| `FeatureDefinition` (`app.models.feature`) | Config artifact, not a scoring component | Non-trainable | Already immutable, versioned per (org, name) — predates Phase 5 and is **not duplicated** by the new registry | N/A | N/A | Feature computation spec | N/A | N/A | Feeds Isolation Forest / dataset builder |
+| `FeatureDefinition` (`app.models.feature`) | Config artifact, not a scoring component | Non-trainable | Already immutable, versioned per (org, name) — predates and is **not duplicated** by the new registry | N/A | N/A | Feature computation spec | N/A | N/A | Feeds Isolation Forest dataset builder |
 | `DatasetBuild` (`app.timeseries.dataset_builder`) | Dataset construction record | N/A | Append-only, one row per build request; no "version number" | Sensor series + feature specs + time grid | N/A | Reproducible config snapshot (matrix recomputed on demand, never persisted) | N/A | N/A | Used by feature engineering; no supervised training consumes it yet |
-| Supervised fault classifier / RUL estimator | — | — | — | — | — | — | — | — | **Not implemented.** `MaintenanceEvent` (planned in Phase 1, re-confirmed in Phase 4) still has zero rows and no ingestion workflow in every environment this schema has run in, including the real seeded demo database checked again for this phase. No failure or maintenance-outcome labels exist anywhere in this platform. |
+| Supervised fault classifier RUL estimator | — | — | — | — | — | — | — | — | **Not implemented.** `MaintenanceEvent` (planned, re-confirmed) still has zero rows and no ingestion workflow in every environment this schema has run in, including the real seeded demo database checked again. No failure or maintenance-outcome labels exist anywhere in this platform. |
 | Background jobs (`app.jobs.runner`, `JobType`) | Infrastructure | N/A | `BATCH_INGESTION`, `DATA_QUALITY_SCAN`, and `DATASET_BUILD` and `ANOMALY_DETECTION_RUN` are registered and used; **`DETECTOR_TRAINING` is declared in the `JobType` enum but has no registered handler** — detector training (`create_model_version`) has always run synchronously, in every phase, including this one | — | — | — | — | — | Confirmed by re-reading `app/jobs/handlers.py`: `register_job_handlers()` only registers three handlers | — |
-| Existing model metadata | — | — | `ModelVersion.evaluation_results` (synthetic only), `ForecastModel.evaluation_results` (real backtest, always populated) | — | — | — | — | — | These are genuine existing "experiment-adjacent" metadata this phase builds a registry **on top of**, not a replacement for |
+| Existing model metadata | — | — | `ModelVersion.evaluation_results` (synthetic only), `ForecastModel.evaluation_results` (real backtest, always populated) | — | — | — | — | — | These are genuine existing "experiment-adjacent" metadata this layer builds a registry **on top of**, not a replacement for |
 | Existing monitoring | — | — | `anomaly_service.get_monitoring_summary`, `condition_service.get_condition_monitoring_summary` — both real, count-based, explicitly not drift detection | — | — | — | — | — | Reused directly by the new `mlops_service.get_mlops_monitoring_summary`, not re-implemented |
-| Existing tests | — | — | 204 backend tests (172 Phases 1-3 + 32 Phase 4), all passing at the start of this phase | — | — | — | — | — | — |
+| Existing tests | — | — | 204 backend tests (172 core + 32 condition/forecasting), all passing at the outset | — | — | — | — | — | — |
 
 **What this audit ruled out up front:** there is no second trainable model
 to compare against, no labeled outcome data for a real accuracy gate, and
@@ -48,7 +48,7 @@ heuristic methods — never assuming a fifth kind that doesn't exist.
 `app.models.mlops.LifecycleStage`: `EXPERIMENTING → TRAINED → EVALUATED →
 VALIDATED → APPROVED → ACTIVE → RETIRED`, with `FAILED` reachable from the
 training/evaluation step. `EXPERIMENTING` is defined but not yet reachable
-through this module — there is no experiment-tracking UI in this phase
+through this module — there is no experiment-tracking UI
 that would create a `ComponentVersion` before training completes; it is
 reserved rather than faked.
 
@@ -61,7 +61,7 @@ The remaining six stages are real and mean something different per kind:
   `EVALUATED` → `VALIDATED` requires that evaluation actually produced a
   scenario result → `APPROVED` → `ACTIVE`.
 - **`FORECASTING_MODEL`** (backed by `ForecastModel`): its mandatory
-  backtest already ran during fitting (Phase 4's design), so it enters
+  backtest already ran during fitting (the design), so it enters
   the registry **already at `EVALUATED`** — there is no separate
   `TRAINED` moment to represent. `VALIDATED` is only reachable if the
   underlying model's status is `JUSTIFIED`; a `NOT_JUSTIFIED` forecast can
@@ -79,11 +79,11 @@ Every transition is a named function in `app.services.mlops_service`
 
 ## 2. Experiment / run tracking
 
-This phase does not introduce a second, parallel run-tracking table.
-Phases 3-4 already built real run records — `ModelRun` (detection runs),
+This layer does not introduce a second, parallel run-tracking table.
+Already built real run records — `ModelRun` (detection runs),
 `ForecastRun` (forecast generation) — that carry config, time range,
 status, timestamps, and bounded real metrics, and never overwrite history.
-`RetrainingRequest` (new in this phase) is the closest analogue to a
+`RetrainingRequest` (new) is the closest analogue to a
 "training run" record: it carries the exact config used, `reason`
 (mandatory — no anonymous retraining), `status`
 (`requested → running → evaluated/failed`), `started_at`/`finished_at`,
@@ -98,7 +98,7 @@ already do well.
 `RetrainingRequest.config` is a full, replayable snapshot (sensor ids,
 reference period, step size, threshold overrides) — the same "config
 snapshot" discipline `DatasetBuild.config` and `ModelVersion.detector_config`
-already established in Phases 2-3. No new fingerprinting scheme was
+already established. No new fingerprinting scheme was
 added: `ModelVersion`/`ForecastModel`/`FeatureDefinition` IDs are already
 stable, real identifiers, and inventing a checksum over already-immutable
 rows would add complexity without adding trust. Where "reference period"
@@ -108,11 +108,11 @@ analysis, §12), both periods are recorded explicitly on
 
 ## 4. Feature contracts & compatibility
 
-Phase 3 already enforces this at the point that matters: `ModelVersion.
+Already enforces this at the point that matters: `ModelVersion.
 feature_schema` (isolation_forest only) names the ordered feature list a
 detector was trained on, and `execute_detection_run` rebuilds the scoring
 matrix from that exact stored config — there is no path to silently score
-a differently-shaped vector. This phase adds one more layer, at
+a differently-shaped vector. This adds one more layer, at
 activation time: `_check_activation_compatibility` in `mlops_service`
 re-resolves every sensor id the active-candidate version depends on
 (`get_sensor_in_org`) and refuses activation (422, with the specific
@@ -133,12 +133,12 @@ declared type matches both the `VersionKind` being registered
 against a *set* of allowed detector types per component type
 (`_COMPONENT_TYPE_TO_DETECTOR_TYPES`), not a single fixed one:
 `TRAINED_ML_MODEL` accepts `isolation_forest` or `mahalanobis` (both are
-real `sklearn` estimators fit on data — Phase 14 added the Mahalanobis
+real `sklearn` estimators fit on data — the Mahalanobis detector was added
 detector to this same bucket rather than inventing a fifth component
 type for it), `robust_zscore` only under `STATISTICAL_DETECTOR` (closed-
 form, never fitted) — verified by
 `test_component_type_and_version_kind_mismatch_rejected` and, for the
-Phase 14 addition specifically,
+Addition specifically,
 `test_mahalanobis_component_registers_under_trained_ml_model_and_retrains`
 / `test_robust_zscore_still_rejected_under_trained_ml_model`. Retraining a
 `TRAINED_ML_MODEL`/`STATISTICAL_DETECTOR` component (§13) resolves which
@@ -169,7 +169,7 @@ allowed, with a regression test
 
 No new artifact store was built. The only "artifact" a trained model in
 this codebase produces is the JSON-serializable config/summary already
-stored on `ModelVersion`/`ForecastModel` (Phase 3's isolation forest is
+stored on `ModelVersion`/`ForecastModel` (the isolation forest is
 deliberately **never pickled** — see that module's docstring — it is
 re-fit deterministically from stored config with a fixed seed instead).
 There is therefore nothing to checksum that isn't already an immutable
@@ -183,7 +183,7 @@ because it's popular" this project's principles forbid.
 
 - **Isolation Forest**: `random_state=42`, fit fresh from immutable stored
   config every time — reproducible given the same measurement data, which
-  is itself immutable once ingested. Verified again in this phase's live
+  is itself immutable once ingested. Verified again's live
   validation (§21): the same real detector, retrained on the same real
   reference period, produced structurally identical output.
 - **Robust z-score / linear-trend forecaster**: closed-form statistics —
@@ -202,7 +202,7 @@ because it's popular" this project's principles forbid.
 ## 8. Evaluation gates — task-specific, never a universal accuracy threshold
 
 There is exactly one place in this platform where a genuine accuracy-style
-gate could be built honestly, and it already existed before this phase:
+gate could be built honestly, and it already existed beforehand:
 `ForecastModel.status = JUSTIFIED` requires beating two naive baselines by
 ≥10% MAE on a real leak-free holdout — an evidence-based, non-arbitrary
 gate. `validate_version` **reuses this gate directly**: a
@@ -285,7 +285,7 @@ merged into one score:
 
 ## 12. Data / feature shift analysis
 
-Genuinely new in this phase. `run_shift_analysis` compares a reference
+Genuinely new. `run_shift_analysis` compares a reference
 period against a comparison period for one sensor: observation counts,
 missingness, mean/std/median/min/max for both, and — only when both
 periods have at least `MIN_SHIFT_OBSERVATIONS=10` real observations — a
@@ -315,9 +315,9 @@ retraining automatically** — it is a recorded observation, full stop.
 `reason` — no anonymous retraining) → `execute_retraining_request`
 (explicit, separate call) sets `RUNNING`, commits that state **before**
 entering the training call (the exact `db.commit()`-before-`try` pattern
-Phase 4's self-review established, to guarantee a mid-training exception
+the self-review established, to guarantee a mid-training exception
 can still mark the request `FAILED` with the real error rather than
-crashing on a `None` row — see that phase's `condition_service` fix) →
+crashing on a `None` row — see the `condition_service` fix) →
 calls the real `anomaly_service.create_model_version` or
 `condition_service.create_forecast_model` with the request's config → on
 success, registers a new `ComponentVersion` (at `TRAINED`/`EVALUATED`/
@@ -394,9 +394,9 @@ into a single generic "model" label.
 **Scope decision, stated plainly:** MLOps lifecycle operations
 (evaluation, validation, retraining execution) run synchronously in this
 phase, calling the same synchronous training primitives
-(`create_model_version`, `create_forecast_model`) Phases 3-4 already
-built — and, per the §0 audit, `JobType.DETECTOR_TRAINING` was declared
-but never wired to a handler even before this phase, so there was no
+(`create_model_version`, `create_forecast_model`) that already
+existed — and, per the §0 audit, `JobType.DETECTOR_TRAINING` was declared
+but never wired to a handler even beforehand, so there was no
 existing async training path to integrate with. Adding fake async
 plumbing around an operation that has never been async anywhere else in
 this codebase would be exactly the kind of infrastructure this project's
@@ -406,7 +406,7 @@ principles warn against. `RetrainingRequest` still carries real
 but synchronous" operations), so the request/execute split still gives
 genuine before/after visibility — it is just not routed through
 `app.jobs.runner`. The upgrade path is straightforward and explicitly
-documented here rather than silently deferred: if a future phase adds
+documented here rather than silently deferred: if later work adds
 supervised training on larger data volumes, `execute_retraining_request`
 can be split into a job-runner-backed async path using the exact
 `MAX_DETECTION_ROWS_SYNC`-style threshold pattern `create_detection_run`
@@ -428,7 +428,7 @@ already establishes, without changing this module's public contract.
   active_component` checks the request shape before dispatching, and
   `execute_retraining_request` commits its `RUNNING` state before
   training so a mid-run exception can never leave a request stuck or the
-  underlying row missing (the exact class of bug Phase 4's self-review
+  underlying row missing (the exact class of bug the self-review
   found and fixed, applied here proactively).
 - No silently-misleading failure output anywhere in this module — every
   failure path (`ConflictError`/`ValidationFailedError`/`NotFoundError`)
@@ -453,18 +453,18 @@ an unjustified model and the full lifecycle for a justified one; the
 heuristic evidence-only validation gate; scoring refusal with no active
 version (and its governance event); the component-type/version-kind
 mismatch rejection; the differently-named-detector rejection (the bug
-found in self-review, §5); role authorization (VIEWER blocked from every
+found in code review, §5); role authorization (VIEWER blocked from every
 write, and the ADMIN-only approve/activate boundary specifically);
 cross-org isolation; both shift-analysis paths (insufficient data, and a
 real detected mean shift); and the monitoring summary's real structure.
 Every backend test in this platform — 216 total (204 carried over from
-Phases 1-4 + 12 new here, after the self-review fix landed a 12th test)
-— was actually run for this phase; see §23.
+existing + 12 new here, after the self-review fix landed a 12th test)
+— was actually run; see §23.
 
 ## 20. Documentation scope
 
 This document describes only what was built: the registry and lifecycle
-on top of Phases 3-4's real detectors/forecasters, controlled retraining
+on top of the real detectors/forecasters, controlled retraining
 that calls real training code, on-demand shift analysis with two real
 statistical tests, and an append-only governance log. It does not
 document a model artifact store, a feature store, a message-broker-backed
@@ -474,7 +474,7 @@ implicit.
 
 ## 21. End-to-end validation against real data
 
-Beyond the API test suite, this phase's stop condition — "at least one
+Beyond the API test suite, the acceptance criterion — "at least one
 real intelligence component can move through a traceable lifecycle... with
 its inference outputs traceable back to the exact version that produced
 them" — was validated against the platform's actual seeded database
@@ -514,7 +514,7 @@ Every number above is a genuine output of this run, not illustrative text.
 
 ## 22. Principal MLOps self-review
 
-Reviewed against the checklist this phase specifies:
+Reviewed against the release checklist:
 
 - **Traceability**: every scoring output carries a provenance envelope
   (§10); every lifecycle action is logged (§14). ✓.
@@ -522,7 +522,7 @@ Reviewed against the checklist this phase specifies:
   per-run environment fingerprint (§7). ✓, with the gap named rather than
   hidden.
 - **Feature-mismatch prevention**: pre-activation dependency re-resolution
-  (§4/§9); Phase 3's existing `feature_schema` enforcement at scoring
+  (§4/§9); the existing `feature_schema` enforcement at scoring
   time. ✓.
 - **Honest evaluation claims**: three distinct, task-appropriate gates
   (§8), none of them an invented universal accuracy threshold. ✓.
@@ -551,13 +551,13 @@ constraint violation) the first time two differently-named detectors were
 registered under one component, exactly the kind of silently-misleading
 failure this platform's principles forbid. Fixed with an explicit 422 and
 a regression test (`test_registering_a_differently_named_detector_is_
-rejected`) before this phase's validation gate was run.
+rejected`) beforehand's validation gate was run.
 
 ## 23. Validation gate — actually executed
 
 - `python3 -m pytest -q tests/test_api_mlops.py` → **12 passed**.
 - `python3 -m pytest -q` (the full backend suite) → **216 passed** (204
-  carried over from Phases 1-4, unmodified and still green, + 12 new).
+  carried over, unmodified and still green, + 12 new).
 - `alembic upgrade head` on the real seeded database, followed by
   `alembic check` → **"No new upgrade operations detected."** (migration
   `806aec7b2bfd`, purely additive — five new tables, no drops, no changes
@@ -576,18 +576,18 @@ rejected`) before this phase's validation gate was run.
 No test was skipped, and nothing above is asserted without having actually
 been run in this session.
 
-## 24. Phase 14 addendum — a second trained ML model joins the registry
+## 24. Addendum — a second trained ML model joins the registry
 
-Phase 14 added `app.anomaly.mahalanobis_detector` (a robust-covariance
+Added `app.anomaly.mahalanobis_detector` (a robust-covariance
 multivariate anomaly detector — see `docs/ANOMALY_DETECTION.md` §1a for
 what it detects and why). This section records what changed in THIS
 layer as a result — not a restatement of §0-23 above, which describe the
-registry as it stood at the end of Phase 5 and remain historically
+registry as it stood at the end and remain historically
 accurate for that snapshot.
 
 What changed here:
 
-- `_COMPONENT_TYPE_TO_DETECTOR_TYPES` (renamed from the Phase 5-era
+- `_COMPONENT_TYPE_TO_DETECTOR_TYPES` (renamed-era
   `_COMPONENT_TYPE_TO_DETECTOR_TYPE`) now maps `TRAINED_ML_MODEL` to a SET
   of allowed detector types (`{isolation_forest, mahalanobis}`) instead of
   one fixed type — both are real `sklearn` estimators fit on data, the
@@ -621,11 +621,9 @@ still `detector_type=mahalanobis`) and
 direction of the same fix: widening `TRAINED_ML_MODEL` to accept
 `mahalanobis` must not also accidentally widen it to accept
 `robust_zscore`). The full backend suite — 512 tests as of this addendum
-(494 confirmed passing at the start of Phase 14 per
-`docs/history/PHASE_13_REPORT.md`, +14 new pure-function tests for the
+(494 confirmed passing at the start, +14 new pure-function tests for the
 Mahalanobis detector itself, +4 new API-level tests covering this
-registry change) — passes; see `docs/history/PHASE_14_REPORT.md` for the
-complete run log.
+registry change) — passes.
 
 ## What this is not
 

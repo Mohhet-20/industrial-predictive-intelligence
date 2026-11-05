@@ -4,9 +4,9 @@ Revision ID: 45c7287e229d
 Revises: 27ddea19d63c
 Create Date: 2026-08-30 08:08:53.614975
 
-Adds the five Phase 4 tables (condition_runs, degradation_signals,
+Adds the five tables (condition_runs, degradation_signals,
 degradation_reviews, forecast_models, forecast_runs) and drops
-`predictions` — the Phase-3-era table reserved for this work, superseded
+`predictions` — the original table reserved for this work, superseded
 by forecast_models/forecast_runs (see app.models.condition's module
 docstring). `predictions` had zero rows in every environment this schema
 has run in; the guard below re-verifies that rather than assuming it.

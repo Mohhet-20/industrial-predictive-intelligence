@@ -1,4 +1,4 @@
-"""Intelligence Orchestration API (Phase 6): unified timeline, evidence-
+"""Intelligence Orchestration API: unified timeline, evidence-
 based prioritization, cross-layer asset summary, cross-sensor context, and
 model/method provenance. Entirely read-only — every route here is a GET,
 open to any authenticated organization member (the same read boundary as

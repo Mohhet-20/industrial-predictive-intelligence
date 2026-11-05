@@ -111,7 +111,7 @@ def test_pagination_offset_and_limit_are_honored():
 
 def test_missing_sensor_series_produces_null_feature_not_a_crash():
     result = build_feature_matrix(
-        series_by_sensor={},  # sensor referenced by the spec was never loaded
+        series_by_sensor={},  # sensor referenced by the design was never loaded
         feature_specs=[FeatureSpec("m", "missing-sensor", FeatureKind.MEAN, 3600, {})],
         grid_start=BASE,
         grid_end=BASE + timedelta(minutes=10),

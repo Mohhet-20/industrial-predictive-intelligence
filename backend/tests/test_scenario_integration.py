@@ -1,5 +1,5 @@
 """Investigation and copilot integration tests for Scenario Simulation
-(Phase 11 §14, §15). Confirms a scenario run can be attached to an
+. Confirms a scenario run can be attached to an
 investigation as evidence WITHOUT altering the investigation's real
 evidence, and that the copilot always labels a scenario result as
 SIMULATED/HYPOTHETICAL — both when it's reached through an investigation's

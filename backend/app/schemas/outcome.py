@@ -1,5 +1,5 @@
 """Pydantic schemas for the closed-loop outcome/verification/evaluation
-API (Phase 12). Response models use `from_attributes=True` throughout so
+API. Response models use `from_attributes=True` throughout so
 they can be built directly from the ORM rows returned by
 app.services.feedback_service."""
 from datetime import datetime

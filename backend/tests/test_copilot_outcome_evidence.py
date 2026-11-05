@@ -1,5 +1,5 @@
-"""Tests that the copilot's evidence-retrieval layer (Phase 9) correctly
-surfaces Phase 12 closed-loop outcome evidence — grounded in real
+"""Tests that the copilot's evidence-retrieval layer correctly
+surfaces closed-loop outcome evidence — grounded in real
 reported outcomes and their verification/link state, never upgrading an
 unverified report to confirmed ground truth, and always labeling a
 scenario-linked outcome as simulated.

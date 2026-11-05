@@ -25,7 +25,7 @@ is the single most common way monitoring software overstates what it knows.
 | **Anomaly** | A measurement or short window of measurements that is statistically unusual relative to a declared reference period, per a specific, named method (robust z-score or Isolation Forest) | Not a fault. Not necessarily even a real problem — it is evidence a human should look at. |
 | **Condition signal** | Evidence about equipment condition derived from a longer observation window (trend, variance change, distributional shift) | Not a diagnosis. Not a remaining-useful-life estimate. |
 | **Risk / prioritization** | A transparent, factor-exposing ranking (persistence, cross-detector agreement, data-quality context) used to order what a human should look at first | Not a probability of failure. This platform never emits a number that looks like "73% chance of failure" because nothing here was trained or validated to produce one. |
-| **Failure prediction** | A supervised model trained on real labeled failure/maintenance outcomes that predicts a specific future fault | **Not implemented anywhere in this platform.** This repository's evidence audits (Phase 4 §0, re-confirmed Phase 5 §0 and Phase 6 §0) found zero failure or maintenance-outcome labels in the available data. Building a failure predictor without those labels would mean fabricating the exact kind of unearned confidence this project is built to avoid. |
+| **Failure prediction** | A supervised model trained on real labeled failure/maintenance outcomes that predicts a specific future fault | **Not implemented anywhere in this platform.** This repository's evidence audits, re-confirmed and found zero failure or maintenance-outcome labels in the available data. Building a failure predictor without those labels would mean fabricating the exact kind of unearned confidence this project is built to avoid. |
 
 Every other section of this document, and every intelligence output in the
 product, is scoped by this table. If a claim doesn't fit one of the first
@@ -81,7 +81,7 @@ it appears.
 
 ## 3. Condition intelligence & forecasting methodology
 
-**Evidence audit before building anything**: Phase 4 began by re-auditing
+**Evidence audit before building anything**: the condition work began by re-auditing
 what data actually exists and found no failure/maintenance labels — only
 unlabeled sensor time-series. Every capability in this layer was scoped to
 that reality rather than assumed (`docs/CONDITION_INTELLIGENCE.md` §0).
@@ -137,7 +137,7 @@ against, structurally, not by developer discipline alone:
    trained in this platform's training-dataset builder cannot accidentally
    train on data that is, in wall-clock terms, from the future relative to
    its test set. This is tested directly (temporal-leakage-prevention
-   tests in the Phase 2 test suite), not just documented as an intention.
+   tests test suite), not just documented as an intention.
 
 ---
 

@@ -1,5 +1,5 @@
 """Pydantic schemas for the MLOps / Intelligence Lifecycle & Governance API
-(Phase 5). Mirrors app.schemas.condition's conventions: loose `dict[str,
+. Mirrors app.schemas.condition's conventions: loose `dict[str,
 Any]` for config/result/evidence payloads (validated by
 app.services.mlops_service, not the schema layer), fully typed response
 models for everything returned to a client."""

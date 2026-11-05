@@ -1,4 +1,4 @@
-"""Copilot conversation persistence + orchestration glue (Phase 9).
+"""Copilot conversation persistence + orchestration glue.
 
 Conversations and messages are scoped by BOTH organization_id (the usual
 tenant-isolation boundary) AND user_id — a copilot conversation is a

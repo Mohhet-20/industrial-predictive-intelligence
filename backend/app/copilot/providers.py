@@ -1,4 +1,4 @@
-"""LLM provider abstraction (Phase 9 §9).
+"""LLM provider abstraction.
 
 Core application logic (app/copilot/orchestrator.py) never imports a
 provider SDK or constructs a provider-specific request directly — it only

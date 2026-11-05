@@ -1,4 +1,4 @@
-"""Robustness & sensitivity testing (Phase 10 §5).
+"""Robustness & sensitivity testing.
 
 Every scenario here builds a synthetic series with a KNOWN, documented
 perturbation and runs it through the real, unmodified detection code

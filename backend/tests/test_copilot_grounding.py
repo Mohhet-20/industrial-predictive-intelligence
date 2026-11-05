@@ -1,5 +1,5 @@
 """Unit tests for the grounding data model, prompt construction, and the
-post-generation hallucination/overclaim safeguard (Phase 9 §6).
+post-generation hallucination/overclaim safeguard.
 
 These tests exercise app/copilot/grounding.py directly, with no HTTP
 layer and no provider — the point is to prove the safeguard itself is a
@@ -115,7 +115,7 @@ def test_validate_response_grounding_no_evidence_no_false_flag():
 
 
 # ---------------------------------------------------------------------------
-# Input-side sanitization (Phase 15) — a human-authored evidence field
+# Input-side sanitization — a human-authored evidence field
 # (an annotation, an outcome description, a note) attempting to redirect
 # the model's instructions must be neutralized before it ever reaches a
 # prompt, independent of whatever the post-generation safeguard above

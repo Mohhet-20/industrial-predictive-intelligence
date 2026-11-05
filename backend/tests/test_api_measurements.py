@@ -119,8 +119,8 @@ def test_data_quality_visible_after_ingestion(client, auth_headers):
 
 
 def test_old_intelligence_predictions_stub_route_removed(client, auth_headers):
-    # Phase 3 stubbed predictive maintenance at /intelligence/predictions
-    # (honest 501 "not yet available"). Phase 4 replaced it with a real,
+    # Stubbed predictive maintenance at /intelligence/predictions
+    # (honest 501 "not yet available"). It was later replaced with a real,
     # honesty-gated forecasting implementation at /condition/forecast-models
     # — see tests/test_api_condition.py for its refusal-path coverage
     # (NOT_JUSTIFIED/FAILED models correctly blocking forecast runs). The

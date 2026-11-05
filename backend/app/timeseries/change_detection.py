@@ -167,6 +167,6 @@ def detect_change_candidates(
         "window_observation_count": window_size,
         "note": (
             "These are statistical CANDIDATES for human review, not confirmed anomalies or fault "
-            "diagnoses. A rigorous, validated anomaly-detection layer is planned for a later phase."
+            "diagnoses. A rigorous, validated anomaly-detection layer is planned for later work."
         ),
     }

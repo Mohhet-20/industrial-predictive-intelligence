@@ -6,11 +6,11 @@ that would be dangerous if left in place — the JWT secret has a dev-only
 placeholder that is validated as *present*, not as secure; operators are
 expected to override it (documented in .env.example and SETUP.md).
 
-Phase 7 addition: when APP_ENV=production, a second validation pass
+Addition: when APP_ENV=production, a second validation pass
 refuses to start with configuration that would be silently dangerous in a
 real deployment (the well-known dev JWT secret, a wildcard CORS origin
 combined with credentials, or DEBUG-level logging). This is fail-fast
-config validation, not a runtime toggle — see §2 of
+config validation, not a runtime toggle — see of
 docs/RELIABILITY_AND_OPERATIONS.md.
 """
 from functools import lru_cache
@@ -38,17 +38,17 @@ class Settings(BaseSettings):
 
     api_v1_prefix: str = "/api/v1"
 
-    # Background job runner (Phase 7): a job that runs longer than this is
+    # Background job runner: a job that runs longer than this is
     # treated as hung and force-failed rather than left RUNNING forever —
-    # see app/jobs/runner.py and §6 of docs/RELIABILITY_AND_OPERATIONS.md.
+    # see app/jobs/runner.py and of docs/RELIABILITY_AND_OPERATIONS.md.
     job_timeout_seconds: int = 300
 
-    # API reliability (Phase 7): requests with a Content-Length above this
+    # API reliability: requests with a Content-Length above this
     # are rejected with 413 before any parsing/DB work happens — see
-    # app/core/middleware.py BodySizeLimitMiddleware and §8 of the doc above.
+    # app/core/middleware.py BodySizeLimitMiddleware and of the doc above.
     max_request_body_bytes: int = 10 * 1024 * 1024  # 10 MB
 
-    # Basic anti-brute-force on /auth/login (Phase 7, §10). Explicitly
+    # Basic anti-brute-force on /auth/login. Explicitly
     # scoped: in-memory, per-process, resets on restart — not a distributed
     # rate limiter. Documented as such rather than oversold.
     # Public demo: POST /auth/guest signs a visitor in as this one non-admin account, no password. Off by default.
@@ -58,7 +58,7 @@ class Settings(BaseSettings):
     login_rate_limit_attempts: int = 5
     login_rate_limit_window_seconds: int = 60
 
-    # Optional AI copilot (Phase 9) — see docs/COPILOT.md. Absent/empty
+    # Optional AI copilot — see docs/COPILOT.md. Absent/empty
     # ANTHROPIC_API_KEY means the copilot runs in "not configured" mode:
     # the rest of the platform is completely unaffected, and the copilot
     # API answers honestly that no provider is available rather than

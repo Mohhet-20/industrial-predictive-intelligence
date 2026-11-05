@@ -1,8 +1,8 @@
 """Evaluation against the synthetic scenario suite (app.anomaly.synthetic_scenarios).
 
 No real labeled fault data exists for this platform (see docs/SYNTHETIC_DATA.md
-from Phase 1 — the demo dataset's injected spikes/step-changes are not
-annotated ground truth). Per this phase's own instructions: when no
+from the start — the demo dataset's injected spikes/step-changes are not
+annotated ground truth). By design: when no
 reliable labels exist, do not fabricate accuracy metrics. What CAN be
 computed honestly here is precision/recall/F1 against the synthetic
 scenarios' own deterministic, code-defined ground truth — which is a

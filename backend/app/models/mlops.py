@@ -1,7 +1,7 @@
-"""Intelligence lifecycle, registry, and governance domain tables (Phase 5).
+"""Intelligence lifecycle, registry, and governance domain tables.
 
 WHAT THIS MODULE DOES NOT DO: it does not re-implement training, detection,
-or forecasting. Every real computation still lives where Phases 2-4 put it
+or forecasting. Every real computation still lives where put it
 (app.anomaly.*, app.condition.*, app.timeseries.*) and every real trained
 artifact still lives in app.models.intelligence.ModelVersion or
 app.models.condition.ForecastModel. This module adds a thin, honest
@@ -9,7 +9,7 @@ GOVERNANCE LAYER on top of those existing tables: a stable logical identity
 per capability (IntelligenceComponent), a lifecycle stage per concrete
 version of that capability (ComponentVersion), an append-only audit trail
 of every lifecycle action (GovernanceEvent), plus two genuinely new
-capabilities Phases 1-4 never built: a controlled retraining-request
+capabilities never built: a controlled retraining-request
 workflow (RetrainingRequest) and a data/feature shift-analysis record
 (ShiftAnalysisRun).
 
@@ -22,7 +22,7 @@ needs to apply, one day, to component kinds that have no such table at all
 (a heuristic method like app.condition.degradation, which is pure code with
 no persisted "training" row). Layering the registry on top — referencing
 the real row by id rather than duplicating its fields — keeps ModelVersion/
-ForecastModel exactly as trustworthy as they were in Phases 3-4 (nothing
+ForecastModel exactly as trustworthy as they were (nothing
 about their own columns changes) while giving every component kind,
 trainable or not, the same lifecycle vocabulary. See
 docs/MLOPS_GOVERNANCE.md §0 for the full capability audit this design is
@@ -74,7 +74,7 @@ class VersionKind(str, enum.Enum):
 
 
 class LifecycleStage(str, enum.Enum):
-    """Adapted per component type (spec §1) rather than forced uniformly —
+    """Adapted per component type rather than forced uniformly —
     see app.services.mlops_service for exactly which transitions are legal
     for which ComponentType, and docs/MLOPS_GOVERNANCE.md §1 for the
     reasoning (e.g. a HEURISTIC version has no TRAINED step to pass
@@ -123,7 +123,7 @@ class ComponentVersion(TimestampMixin, Base):
     bookkeeping fields below, which are just a record of when/who) —
     `validation_evidence` is written once, at the VALIDATED transition,
     and never edited afterward, the same append-only discipline as
-    Phase 3/4's investigation/review tables."""
+    the investigation/review tables."""
 
     __tablename__ = "component_versions"
     __table_args__ = (UniqueConstraint("component_id", "version_number", name="uq_component_version_number"),)
@@ -241,7 +241,7 @@ class RetrainingRequestStatus(str, enum.Enum):
 class RetrainingRequest(Base):
     """A controlled, always-explicit request to retrain/refit the real
     underlying detector/forecaster behind one component. Executing a
-    request calls the SAME production training functions Phases 3-4
+    request calls the SAME production training functions
     already built (app.services.anomaly_service.create_model_version /
     app.services.condition_service.create_forecast_model) — never a
     simulated or fabricated result — and produces a new ComponentVersion

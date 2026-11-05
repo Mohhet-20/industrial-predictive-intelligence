@@ -1,5 +1,5 @@
 """API-level tests for the closed-loop outcome/verification/evaluation
-surface (Phase 12) — exercises the real HTTP API against the real DB,
+surface — exercises the real HTTP API against the real DB,
 mirroring tests/test_api_scenario.py's conventions. Covers the full
 report -> link -> verify -> assess -> evaluate workflow, the verification
 state machine, horizon validation, scenario/real separation, the

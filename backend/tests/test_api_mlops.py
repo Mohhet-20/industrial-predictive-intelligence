@@ -1,11 +1,11 @@
 """API-level tests for Intelligence Lifecycle, Registry & Governance
-(Phase 5) — exercises the real HTTP surface against the real DB, mirrors
+ — exercises the real HTTP surface against the real DB, mirrors
 tests/test_api_anomaly.py and tests/test_api_condition.py's conventions.
 
 The centerpiece is test_isolation_forest_full_lifecycle_e2e: it takes one
 REAL intelligence component (the Isolation Forest detector — the one
 genuinely "trained ML model" in this codebase) through the entire
-traceable lifecycle the spec's stop condition requires: register the
+traceable lifecycle the acceptance criteria requires: register the
 component -> train the real underlying detector via the existing /anomaly
 API -> register that trained version -> record a real synthetic
 evaluation -> validate with human evidence -> approve -> activate -> score
@@ -86,7 +86,7 @@ def _train_isolation_forest(client, headers, *, asset, sensor, name="pump-isofor
 
 
 # ---------------------------------------------------------------------------
-# The flagship end-to-end workflow (§21 / stop condition)
+# The flagship end-to-end workflow (/ acceptance criterion)
 # ---------------------------------------------------------------------------
 
 
@@ -209,7 +209,7 @@ def test_isolation_forest_full_lifecycle_e2e(client, auth_headers):
 
 
 # ---------------------------------------------------------------------------
-# Mahalanobis (Phase 14) — proves it shares TRAINED_ML_MODEL with
+# Mahalanobis — proves it shares TRAINED_ML_MODEL with
 # Isolation Forest (both are "a real sklearn estimator fit on data" per
 # app.models.mlops.ComponentType's own docstring), not a bespoke
 # component_type, and that retraining resolves the right detector_type
@@ -243,7 +243,7 @@ def test_mahalanobis_component_registers_under_trained_ml_model_and_retrains(cli
     detector, reference_end = _train_mahalanobis(client, auth_headers, asset=asset, sensor_a=sensor_a, sensor_b=sensor_b)
 
     # Registers under the SAME component_type (trained_ml_model) Isolation
-    # Forest uses — the fix this test exists to prove: before Phase 14,
+    # Forest uses — the fix this test exists to prove:,
     # trained_ml_model accepted only isolation_forest.
     comp_resp = client.post("/api/v1/mlops/components", headers=auth_headers, json={"component_type": "trained_ml_model", "name": detector["name"]})
     assert comp_resp.status_code == 201, comp_resp.text
@@ -405,7 +405,7 @@ def test_registering_a_differently_named_detector_is_rejected(client, auth_heade
     registered under one component, and "component X's active version"
     would stop meaning anything coherent. See
     app.services.mlops_service.register_version's comment for the full
-    reasoning — this was caught and fixed during Phase 5's self-review."""
+    reasoning — this was caught and fixed during code review."""
     asset, sensor = _make_asset_and_sensor(client, auth_headers, asset_code="PUMP-NAMECHECK", sensor_code="temp")
     _ingest(client, auth_headers, asset_code=asset["code"], sensor_code=sensor["code"], n=400, value_fn=lambda i: 50.0 + (i % 5) * 0.1)
     detector_resp = client.post(
@@ -471,7 +471,7 @@ def test_cross_org_isolation_for_components(client, auth_headers, db_session):
 
 
 # ---------------------------------------------------------------------------
-# Shift analysis (§12)
+# Shift analysis
 # ---------------------------------------------------------------------------
 
 
@@ -519,7 +519,7 @@ def test_shift_analysis_detects_a_real_mean_shift(client, auth_headers):
 
 
 # ---------------------------------------------------------------------------
-# Monitoring (§11)
+# Monitoring
 # ---------------------------------------------------------------------------
 
 

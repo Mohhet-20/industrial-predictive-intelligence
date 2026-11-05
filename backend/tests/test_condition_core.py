@@ -1,5 +1,5 @@
 """Pure-function tests for app.condition.* — no database, no FastAPI. See
-tests/test_anomaly_detection_core.py for the equivalent Phase-3 coverage
+tests/test_anomaly_detection_core.py for the equivalent original coverage
 this mirrors."""
 from datetime import datetime, timedelta, timezone
 
@@ -196,7 +196,7 @@ def test_backtest_fit_is_unaffected_by_future_corruption():
     """Corrupting every value strictly after fit_end must not change the
     fit (proof the fit step is structurally blind to future data, not
     just an assertion about the code's intent) — the leak-free analogue of
-    tests/test_features.py's planted-future-value tests from Phase 2."""
+    tests/test_features.py's planted-future-value tests."""
     series = _daily_cycle_series(21, drift_per_day=0.1)
     fit_end = START + timedelta(days=14)
     test_end = START + timedelta(days=21)
@@ -232,7 +232,7 @@ def test_seasonal_series_without_drift_is_honestly_not_justified():
     see app.synthetic.generator) must not be reported as a justified
     linear_trend forecast: a straight line ignores the daily cycle
     entirely and loses to simple persistence. This is the honest-refusal
-    path §4 requires, exercised against the platform's own realistic data
+    path requires, exercised against the platform's own realistic data
     shape rather than a contrived case."""
     series = _daily_cycle_series(21, amplitude=3.0, noise_std=0.6, drift_per_day=0.0, seed=7)
     result = forecasting.backtest_and_compare(series, fit_start=START, fit_end=START + timedelta(days=14), test_end=START + timedelta(days=21))

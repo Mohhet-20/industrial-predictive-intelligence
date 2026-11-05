@@ -5,7 +5,7 @@ Deliberately reports precision only — never recall or F1. This platform has
 no way to enumerate every fault that was never signaled in the first place
 (there is no complete inventory of "things that should have been caught"),
 so recall has no honest denominator here. Reporting a fabricated recall
-number would violate Phase 12's core principle just as surely as inventing
+number would violate the core principle just as surely as inventing
 a confidence score would.
 """
 from __future__ import annotations

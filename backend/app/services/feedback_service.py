@@ -1,5 +1,5 @@
 """Closed-loop outcome, verification, evaluation, and feedback orchestration
-(Phase 12).
+.
 
 CORE PRINCIPLE, enforced everywhere in this module:
 
@@ -18,7 +18,7 @@ It reuses, and never duplicates:
 - app.feedback.error_analysis for late-detection/duplicate/false-negative
   candidate surfacing.
 - app.feedback.label_definitions for the governance-exposed definitions.
-- app.services.mlops_service.request_retraining (Phase 5's existing,
+- app.services.mlops_service.request_retraining (the existing,
   unmodified, human-initiated retraining workflow) — `review_retraining_candidate`
   calls into it on approval and never calls `execute_retraining_request`;
   executing a request remains a separate, later, human action taken through
@@ -585,7 +585,7 @@ def performance_over_time(
     runs. This is a deliberate refusal to synthesize a trend line from
     runs that didn't have enough verified evidence to report a number;
     the caller (API/frontend) must respect `computed` per point rather
-    than treating every run as equally meaningful (Phase 12 §14)."""
+    than treating every run as equally meaningful."""
     query = db.query(OutcomeEvaluationRun).filter(OutcomeEvaluationRun.organization_id == organization_id)
     if component_id:
         query = query.filter(OutcomeEvaluationRun.component_id == component_id)
@@ -782,7 +782,7 @@ def review_retraining_candidate(
         reason = candidate.trigger_reason
         if review_notes:
             reason = f"{reason} | reviewer notes: {review_notes}"
-        # Calls the EXISTING Phase 5 workflow — this only creates a
+        # Calls the EXISTING lifecycle workflow — this only creates a
         # REQUESTED RetrainingRequest row. Executing it (which actually
         # retrains) and activating any resulting version remain separate,
         # later, human-initiated actions through the MLOps workflow — this

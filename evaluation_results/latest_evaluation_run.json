@@ -343,7 +343,7 @@
     "adversarial_and_failure_cases": {
       "component": "adversarial_and_failure_cases",
       "evaluability": "FULLY EVALUABLE WITH AVAILABLE DATA",
-      "note": "Covers the 9 named Phase 10 \u00a710 scenarios: 4 are new checks below, 1 (synthetic-presented-as-real) is covered by app.evaluation.copilot_eval.case_synthetic_labeling, 2 (unsupported failure confirmation) by app.evaluation.copilot_eval's adversarial/anomaly-vs-failure cases, 1 (insufficient history) by app.evaluation.robustness's boundary sweeps, and 1 (gap overlapping anomaly) by app.evaluation.dq_impact + tests/test_evaluation_dq_impact.py's DB-backed propagation test \u2014 see docs/SCIENTIFIC_VALIDATION.md for the unified 9-scenario table.",
+      "note": "Covers the 9 named adversarial scenarios: 4 are new checks below, 1 (synthetic-presented-as-real) is covered by app.evaluation.copilot_eval.case_synthetic_labeling, 2 (unsupported failure confirmation) by app.evaluation.copilot_eval's adversarial/anomaly-vs-failure cases, 1 (insufficient history) by app.evaluation.robustness's boundary sweeps, and 1 (gap overlapping anomaly) by app.evaluation.dq_impact + tests/test_evaluation_dq_impact.py's DB-backed propagation test \u2014 see docs/SCIENTIFIC_VALIDATION.md for the unified 9-scenario table.",
       "checks": [
         {
           "check": "incompatible_model_artifact",

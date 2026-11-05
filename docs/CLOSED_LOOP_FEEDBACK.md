@@ -1,4 +1,4 @@
-# Closed-Loop Intelligence, Outcome Feedback, Continuous Evaluation & Decision Optimization (Phase 12)
+# Closed-Loop Intelligence, Outcome Feedback, Continuous Evaluation & Decision Optimization
 
 ## Core principle
 
@@ -11,13 +11,13 @@ Every table, service function, and API route in this module is built to honor th
 
 ## §0 — Mandatory audit finding
 
-As of this phase, this platform has **zero real-world verified outcome data**.
+Currently, this platform has **zero real-world verified outcome data**.
 
-- `app.models.intelligence.MaintenanceEvent` has existed since Phase 1 as an explicitly documented stub ("PLANNED — no ingestion workflow exists yet") with zero rows and zero real code references anywhere outside its own definition.
-- `app.models.investigation.InvestigationAnnotation` explicitly documents itself as distinct from "a verified outcome (a concept this platform does NOT implement)" prior to this phase.
+- `app.models.intelligence.MaintenanceEvent` has existed as an explicitly documented stub ("PLANNED — no ingestion workflow exists yet") with zero rows and zero real code references anywhere outside its own definition.
+- `app.models.investigation.InvestigationAnnotation` explicitly documents itself as distinct from "a verified outcome (a concept this platform does NOT implement)" previously.
 - No CMMS/ERP/work-order integration exists anywhere in this codebase.
 
-Everything in this phase is built from that honest starting point: a human can now report an outcome and later verify it, but there is no pre-existing historical outcome data to seed evaluation with, and no evaluation will report a metric until enough of that data is collected (see §13/§14).
+Everything is built from that honest starting point: a human can now report an outcome and later verify it, but there is no pre-existing historical outcome data to seed evaluation with, and no evaluation will report a metric until enough of that data is collected (see §13/§14).
 
 ## §1–§3 — Outcome model, source, and type
 
@@ -25,7 +25,7 @@ Everything in this phase is built from that honest starting point: a human can n
 
 `OutcomeSource` has exactly one member, `user_reported`. This is not a placeholder for a future integration — it is an honest statement of the only source that exists today.
 
-**Two distinct clocks, never conflated (Phase 15 Phase I):** `outcome_timestamp` is *when the real-world event occurred*, as the reporting human states it — it can be backdated (reporting today that something happened last week). `Outcome.created_at` (from `TimestampMixin`) is *when this report became known to the platform* — a DB-assigned insert time, set once by `app.services.feedback_service.report_outcome`, never backdated and never editable afterward. §10 below checks both independently, because a backdated `outcome_timestamp` sitting safely inside an evaluation period is not, by itself, proof this platform actually knew about the outcome before that evaluation run claims to have computed its result.
+**Two distinct clocks, never conflated:** `outcome_timestamp` is *when the real-world event occurred*, as the reporting human states it — it can be backdated (reporting today that something happened last week). `Outcome.created_at` (from `TimestampMixin`) is *when this report became known to the platform* — a DB-assigned insert time, set once by `app.services.feedback_service.report_outcome`, never backdated and never editable afterward. §10 below checks both independently, because a backdated `outcome_timestamp` sitting safely inside an evaluation period is not, by itself, proof this platform actually knew about the outcome before that evaluation run claims to have computed its result.
 
 ## §4–§6 — Verification as a separate state machine
 
@@ -60,7 +60,7 @@ Every transition is recorded as a new, append-only `OutcomeVerification` row (ne
 
 1. The outcome's own timestamp is after the evaluation period it's being used to grade (future information), or
 2. The outcome's verification happened after this run's own `computed_at` (the verification used did not exist yet at compute time), or
-3. **(Phase 15)** The outcome's *report* — `Outcome.created_at`, i.e. when it became known to the platform, passed as `outcome_reported_at` — happened after this run's own `computed_at`. This is a distinct leakage shape from (1): a human reporting *today* that an event happened *last week* produces an `outcome_timestamp` safely inside an old evaluation period while the report itself didn't exist in this system until today. Check (1) alone cannot catch that, because it only ever looks at when the real event happened, never at when this platform found out about it. `outcome_reported_at` is an optional parameter (existing callers that only have the first two timestamps are unaffected), but `app.services.feedback_service.run_evaluation` — the only real caller — always supplies it.
+3. **** The outcome's *report* — `Outcome.created_at`, i.e. when it became known to the platform, passed as `outcome_reported_at` — happened after this run's own `computed_at`. This is a distinct leakage shape from (1): a human reporting *today* that an event happened *last week* produces an `outcome_timestamp` safely inside an old evaluation period while the report itself didn't exist in this system until today. Check (1) alone cannot catch that, because it only ever looks at when the real event happened, never at when this platform found out about it. `outcome_reported_at` is an optional parameter (existing callers that only have the first two timestamps are unaffected), but `app.services.feedback_service.run_evaluation` — the only real caller — always supplies it.
 
 Both checks, and `within_horizon` itself, are pure functions of frozen timestamps with no `now`/`linked_at` parameter — enforced structurally (see `tests/test_feedback_matching.py::test_linked_at_is_never_an_input`, which inspects the function signature).
 
@@ -86,11 +86,11 @@ No automatic root-cause inference happens anywhere in this module.
 
 ## §16 — Drift ↔ outcome correlation, without equating shift with degradation
 
-`/feedback/drift-outcome-correlation` presents `ShiftAnalysisRun` rows (Phase 5's existing drift detection) and `OutcomeEvaluationRun` rows for the same sensor side by side, in time order, with an explicit `note` stating a detected shift is **not** automatically equated with measured performance degradation — a human must independently assess both.
+`/feedback/drift-outcome-correlation` presents `ShiftAnalysisRun` rows (the existing drift detection) and `OutcomeEvaluationRun` rows for the same sensor side by side, in time order, with an explicit `note` stating a detected shift is **not** automatically equated with measured performance degradation — a human must independently assess both.
 
 ## §17 — Controlled retraining-candidate workflow (never auto-deploys)
 
-`app.models.outcome.RetrainingCandidate` is a thin, evidence-carrying proposal: `trigger_reason`, optional `supporting_evaluation_run_id`, status `proposed` → `approved`/`dismissed` by a human (`review_retraining_candidate`). On `approved`, it calls the **existing, unmodified** `app.services.mlops_service.request_retraining` (Phase 5) — which only creates a `REQUESTED` `RetrainingRequest` row. This module never calls `execute_retraining_request` or `activate_version`; actually retraining and activating a resulting version remain separate, later, human-initiated actions through the existing MLOps workflow. Re-reviewing an already-reviewed candidate is a 409 conflict, not a silent overwrite.
+`app.models.outcome.RetrainingCandidate` is a thin, evidence-carrying proposal: `trigger_reason`, optional `supporting_evaluation_run_id`, status `proposed` → `approved`/`dismissed` by a human (`review_retraining_candidate`). On `approved`, it calls the **existing, unmodified** `app.services.mlops_service.request_retraining` — which only creates a `REQUESTED` `RetrainingRequest` row. This module never calls `execute_retraining_request` or `activate_version`; actually retraining and activating a resulting version remain separate, later, human-initiated actions through the existing MLOps workflow. Re-reviewing an already-reviewed candidate is a 409 conflict, not a silent overwrite.
 
 ## §18 — Explicit label governance
 
@@ -130,11 +130,11 @@ Two routers: `/outcomes` (report/verify/link/assess) and `/feedback` (evaluation
 
 ## What is explicitly out of scope / foundation only
 
-- **Automatic retraining or automatic model activation** — never implemented here, and would require independent justification and safety work beyond this phase's scope.
+- **Automatic retraining or automatic model activation** — never implemented here, and would require independent justification and safety work beyond the current scope.
 - **Recall/F1** — not computable honestly with this platform's data (no enumeration of un-signaled faults), so never reported.
 - **Root-cause inference** — every error-analysis finding is a candidate for human review, never an automatic conclusion.
 - **A CMMS/ERP/work-order integration** — `OutcomeSource` has exactly one member today; a real integration is future work, not simulated here.
 
-## What is ready for Phase 13
+## What is ready
 
-The full lifecycle — INTELLIGENCE OUTPUT → HUMAN INVESTIGATION → OUTCOME → VERIFICATION → EVALUATION → FUTURE LEARNING CANDIDATE — is preserved end-to-end, with leakage tests, scenario separation, and original-evidence immutability all covered by the test suite (`tests/test_feedback_matching.py`, `test_feedback_metrics.py`, `test_feedback_error_analysis.py`, `test_api_outcome.py`, `test_copilot_outcome_evidence.py`). A future phase building an actual training pipeline on top of `FeedbackDatasetBuild` rows, or a governed auto-retraining trigger on top of `RetrainingCandidate`, has a correctly-separated, provenance-preserving foundation to build from — neither of those is implemented here.
+The full lifecycle — INTELLIGENCE OUTPUT → HUMAN INVESTIGATION → OUTCOME → VERIFICATION → EVALUATION → FUTURE LEARNING CANDIDATE — is preserved end-to-end, with leakage tests, scenario separation, and original-evidence immutability all covered by the test suite (`tests/test_feedback_matching.py`, `test_feedback_metrics.py`, `test_feedback_error_analysis.py`, `test_api_outcome.py`, `test_copilot_outcome_evidence.py`). A later work building an actual training pipeline on top of `FeedbackDatasetBuild` rows, or a governed auto-retraining trigger on top of `RetrainingCandidate`, has a correctly-separated, provenance-preserving foundation to build from — neither of those is implemented here.

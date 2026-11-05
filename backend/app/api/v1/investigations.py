@@ -1,4 +1,4 @@
-"""Investigation Workflow API (Phase 6).
+"""Investigation Workflow API.
 
 Same tenant-isolation and RBAC discipline as every other module in this
 platform: every route is organization-scoped

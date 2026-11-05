@@ -1,6 +1,6 @@
 """Short-horizon trend forecasting — implemented ONLY where a real,
 time-aware, leak-free holdout evaluation shows it beats naive baselines
-(Phase 4 §4).
+.
 
 This is deliberately NOT failure prediction, NOT remaining-useful-life
 estimation, and NOT a general-purpose forecaster. It is a narrow,
@@ -10,7 +10,7 @@ from the in-sample residual distribution — not a calibrated probability.
 
 Why a short-horizon statistical forecast is defensible here where general
 predictive maintenance is not (see docs/CONDITION_INTELLIGENCE.md's
-Phase-4 evidence audit — no failure labels, no maintenance history exist
+original evidence audit — no failure labels, no maintenance history exist
 for this platform): the forecast target is the sensor's OWN held-out
 future value, the same self-supervised target every baseline below is
 also evaluated against. No failure label is required to score it
@@ -19,7 +19,7 @@ as a labeled, baseline-compared statistical projection a reviewer can take
 or leave.
 
 Baselines (always computed, always reported alongside any candidate —
-Phase 4 §7's mandatory baseline comparison):
+'s mandatory baseline comparison):
   naive_last_value   forecast(t) = the last value observed at/before the
                       fit cutoff. The standard, famously hard-to-beat
                       baseline for slow-moving industrial sensor data.

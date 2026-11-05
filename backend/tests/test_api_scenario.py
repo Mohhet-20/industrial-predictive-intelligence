@@ -1,4 +1,4 @@
-"""API-level tests for Scenario Simulation / What-If Analysis (Phase 11)
+"""API-level tests for Scenario Simulation What-If Analysis
 — exercises the real HTTP surface against the real DB, mirroring
 tests/test_api_condition.py's conventions. Covers the full create ->
 validate -> run -> compare -> inspect workflow, the non-destructive
@@ -150,7 +150,7 @@ class TestValidationRejection:
 
 
 class TestMissingDataGapScenario:
-    """Phase 15 Phase H: the 'missing-data interval' perturbation type —
+    """the 'missing-data interval' perturbation type —
     observations are DROPPED (not changed) within the modification window,
     and that drop must (a) never touch the real stored measurements and
     (b) show up honestly in the simulated bundle's observation_count,

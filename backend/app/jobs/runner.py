@@ -4,15 +4,15 @@ This is deliberately NOT Celery/RQ/a message broker: the async work in this
 foundation (batch ingestion of a few thousand records, a bounded detection
 run) finishes in seconds to low minutes, and every job's outcome only needs
 to be visible within this one process's database. Running a broker for that
-would be the "distributed infrastructure to look advanced" the spec
+would be the "distributed infrastructure to look advanced" the design
 explicitly warns against.
 
 What it does provide, for real: a queryable BackgroundJob row per unit of
 work with genuine status/progress/result/error, a bounded worker pool so
 jobs don't all run at once, correlation-ID propagation into job logs, a
-per-job execution timeout (Phase 7) so a hung job fails explicitly instead
+per-job execution timeout so a hung job fails explicitly instead
 of leaving a BackgroundJob stuck RUNNING forever, and duplicate-submission
-protection (Phase 7) keyed by an optional caller-supplied dedup_key.
+protection keyed by an optional caller-supplied dedup_key.
 
 On retries: BackgroundJob has retry_count/max_retries columns, but this
 runner does not implement blind automatic retry. Retrying is only safe when

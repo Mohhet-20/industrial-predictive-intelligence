@@ -1,13 +1,13 @@
-"""Baseline vs. scenario comparison and sensitivity analysis (Phase 11 §5,
-§8, §9). Pure functions over already-computed pipeline bundles (see
+"""Baseline vs. scenario comparison and sensitivity analysis (
+). Pure functions over already-computed pipeline bundles (see
 app.simulation.pipeline) — no DB access, no re-computation of anything the
 pipeline already produced.
 
-No fabricated combined "future risk" number is ever computed here (§8) —
+No fabricated combined "future risk" number is ever computed here —
 every comparison reports its own real, independently-computed delta on its
 own terms, the same "no composite score" discipline
 app.condition.evidence's module docstring establishes for real condition
-evidence. A sensitivity sweep (§9) reports what the pipeline's real outputs
+evidence. A sensitivity sweep reports what the pipeline's real outputs
 actually did across a range of magnitudes; it is never interpreted as a
 physical dose-response relationship — the mandatory note on every sweep
 result says so explicitly.
@@ -121,7 +121,7 @@ def compare_forecast_backtest(baseline: dict[str, Any], simulated: dict[str, Any
 
 def compare_bundles(baseline_bundle: dict[str, Any], simulated_bundle: dict[str, Any]) -> dict[str, Any]:
     """Assembles every real, independently-computed diff into one
-    dict — never a single blended score (§8). Both bundles must come from
+    dict — never a single blended score. Both bundles must come from
     app.simulation.pipeline.run_series_through_pipeline on the SAME sensor
     (same unit by construction, since both series came from that sensor's
     own real measurements)."""
@@ -140,7 +140,7 @@ def summarize_sensitivity_sweep(sweep_points: list[dict[str, Any]]) -> dict[str,
     one per magnitude already run through the real pipeline. This function
     only sorts and packages — it never fits a curve, never extrapolates
     beyond the tested magnitudes, and never claims the relationship between
-    magnitude and outcome is linear, monotonic, or physically caused (§9)."""
+    magnitude and outcome is linear, monotonic, or physically caused."""
     ordered = sorted(sweep_points, key=lambda p: p["magnitude"])
     return {
         "magnitudes_tested": [p["magnitude"] for p in ordered],

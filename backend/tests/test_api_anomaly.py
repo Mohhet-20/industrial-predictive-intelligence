@@ -207,7 +207,7 @@ def test_isolation_forest_multivariate_e2e(client, auth_headers):
 def test_mahalanobis_multivariate_e2e(client, auth_headers):
     """End-to-end proof, through the real HTTP API and real DB (not just
     the pure-function unit tests in test_mahalanobis_detector.py), that the
-    new Phase 14 detector catches a relationship-breakdown anomaly: two
+    new detector catches a relationship-breakdown anomaly: two
     sensors that normally move together, where a scoring-window segment
     decouples sensor_b from sensor_a while leaving each sensor's own
     univariate range unremarkable — exactly the gap the module docstring

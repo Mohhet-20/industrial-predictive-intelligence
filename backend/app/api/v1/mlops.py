@@ -1,4 +1,4 @@
-"""Intelligence Lifecycle, Registry & Governance API (Phase 5).
+"""Intelligence Lifecycle, Registry & Governance API.
 
 Every route is organization-scoped and every service call re-validates
 that scope server-side, the same tenant-isolation discipline as
@@ -48,7 +48,7 @@ _PRODUCTION_ROLES = (UserRole.ADMIN,)
 
 
 # ---------------------------------------------------------------------------
-# Components & versions (§5, §15)
+# Components & versions
 # ---------------------------------------------------------------------------
 
 
@@ -99,7 +99,7 @@ def get_component_version(component_version_id: str, org_id: str = Depends(organ
 
 
 # ---------------------------------------------------------------------------
-# Evaluation & validation gates (§7, §8)
+# Evaluation & validation gates
 # ---------------------------------------------------------------------------
 
 
@@ -125,7 +125,7 @@ def approve_version(
 
 
 # ---------------------------------------------------------------------------
-# Activation & rollback (§9)
+# Activation & rollback
 # ---------------------------------------------------------------------------
 
 
@@ -151,7 +151,7 @@ def retire_version(
 
 
 # ---------------------------------------------------------------------------
-# Safe scoring / inference contract (§10)
+# Safe scoring inference contract
 # ---------------------------------------------------------------------------
 
 
@@ -165,7 +165,7 @@ def score_via_active_component(
 
 
 # ---------------------------------------------------------------------------
-# Controlled retraining workflow (§13)
+# Controlled retraining workflow
 # ---------------------------------------------------------------------------
 
 
@@ -198,7 +198,7 @@ def get_retraining_request(request_id: str, org_id: str = Depends(organization_s
 
 
 # ---------------------------------------------------------------------------
-# Shift analysis (§12)
+# Shift analysis
 # ---------------------------------------------------------------------------
 
 
@@ -228,7 +228,7 @@ def get_shift_analysis_run(run_id: str, org_id: str = Depends(organization_scope
 
 
 # ---------------------------------------------------------------------------
-# Governance audit log (§14) & monitoring (§11)
+# Governance audit log & monitoring
 # ---------------------------------------------------------------------------
 
 

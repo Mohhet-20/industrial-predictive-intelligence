@@ -1,4 +1,4 @@
-"""Tests for app.evaluation.explainability (Phase 10 §7/§15).
+"""Tests for app.evaluation.explainability.
 
 These assert on the SUBSTANCE of each traceability check (that reported
 explanation numbers actually matched an independent recomputation, that

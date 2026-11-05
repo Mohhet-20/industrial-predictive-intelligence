@@ -1,10 +1,10 @@
-"""Phase 9 — Live end-to-end acceptance test for the evidence-grounded AI
+"""Live end-to-end acceptance test for the evidence-grounded AI
 copilot.
 
 Runs the REAL application (FastAPI TestClient wrapping the actual app, same
 middleware/auth/service/DB stack a real HTTP client would hit) against the
 REAL seeded dev database (backend/data/pred_platform.db — the same org
-every prior phase's live validation uses). Nothing here is mocked or
+each layer's live validation uses). Nothing here is mocked or
 simulated: every step is a real HTTP call through real application code,
 including real evidence retrieval and the real grounding safeguard.
 

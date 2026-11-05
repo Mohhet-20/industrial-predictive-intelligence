@@ -1,6 +1,6 @@
 """Unit tests for app.anomaly.mahalanobis_detector and its companion
 app.anomaly.multivariate_synthetic_scenarios — the pure, DB-agnostic
-robust-covariance multivariate detector added in Phase 14 to catch
+robust-covariance multivariate detector added to catch
 relationship-breakdown anomalies that app.anomaly.robust_zscore (single
 sensor) and app.anomaly.isolation_forest_detector (feature vectors, not
 raw joint relationship) are not built to surface.
@@ -91,7 +91,7 @@ def test_detect_flags_nothing_on_a_well_behaved_relationship():
     genuinely stable data should flag at most a small handful of points at
     a conservative threshold, never a large fraction of the scoring
     window. (A regression guard against the exact bug found and fixed
-    during this phase's own development: an under-varying sensor_a made
+    during its own development: an under-varying sensor_a made
     the fit meaningless and over-flagged everything.)
 
     Uses amplitude=0 (no daily-cycle component) deliberately: with only

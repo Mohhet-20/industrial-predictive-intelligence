@@ -1,6 +1,6 @@
 # CI pipeline. Every step here mirrors scripts/ci_check.sh exactly — that
 # script is what was actually run and validated locally (see
-# docs/RELIABILITY_AND_OPERATIONS.md §16 and §22 for the real output). This
+# docs/RELIABILITY_AND_OPERATIONS.md §16 and for the real output). This
 # workflow file has NOT itself been executed by GitHub Actions in this
 # environment: the repository has no git remote/CI runner attached here.
 # It is real, runnable configuration for when this repo is pushed to

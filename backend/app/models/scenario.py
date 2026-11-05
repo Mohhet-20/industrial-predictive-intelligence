@@ -1,4 +1,4 @@
-"""Scenario simulation / what-if intelligence domain tables (Phase 11).
+"""Scenario simulation what-if intelligence domain tables.
 
 THIS IS SCENARIO ANALYSIS, NOT A PERFECT PHYSICAL DIGITAL TWIN — see
 app.simulation's package docstring and docs/SCENARIO_SIMULATION.md. Nothing
@@ -23,7 +23,7 @@ pandas Series, never the ORM).
   ConditionRun/app.models.intelligence.ModelRun's run-record pattern.
   `scenario_version` freezes which version of the Scenario produced this
   run, so a later edit to the scenario can never retroactively change what
-  an old run's provenance claims it evaluated (§11).
+  an old run's provenance claims it evaluated.
 
 Design choice worth recording: scenario results are NEVER written into
 app.models.intelligence.Anomaly / app.models.condition.DegradationSignal /
@@ -57,7 +57,7 @@ class ScenarioType(str, enum.Enum):
 class ScenarioStatus(str, enum.Enum):
     DRAFT = "draft"          # created, not yet passed validation
     VALIDATED = "validated"  # passed app.simulation.validation — safe to run
-    ARCHIVED = "archived"    # soft-deleted; runs and results are preserved (§12 delete = archive, never a hard delete of history)
+    ARCHIVED = "archived"    # soft-deleted; runs and results are preserved (delete = archive, never a hard delete of history)
 
 
 class Scenario(TimestampMixin, Base):
@@ -91,7 +91,7 @@ class Scenario(TimestampMixin, Base):
     reference_window_end: Mapped["DateTime | None"] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # The sub-window within [baseline_window_start, baseline_window_end]
-    # where the perturbation is actually applied (§1). Not used by
+    # where the perturbation is actually applied. Not used by
     # MULTI_SENSOR at the top level — see parameters.per_sensor.
     modification_start: Mapped["DateTime | None"] = mapped_column(DateTime(timezone=True), nullable=True)
     modification_duration_seconds: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -124,7 +124,7 @@ class ScenarioRunStatus(str, enum.Enum):
 
 class ScenarioRunKind(str, enum.Enum):
     SINGLE = "single"                    # one baseline-vs-simulated comparison
-    SENSITIVITY_SWEEP = "sensitivity_sweep"  # a magnitude sweep (§9) — no single "simulated" series, a set of them
+    SENSITIVITY_SWEEP = "sensitivity_sweep"  # a magnitude sweep — no single "simulated" series, a set of them
 
 
 class ScenarioRun(Base):
@@ -151,7 +151,7 @@ class ScenarioRun(Base):
     # — function names/module paths, and (if a real trained detector was
     # referenced for comparison) that ModelVersion's id + version. Never
     # silently swapped for a newer model on a re-run without this changing
-    # (§11, §16).
+    #.
     pipeline_versions: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
     # The full baseline-vs-simulated bundle — see

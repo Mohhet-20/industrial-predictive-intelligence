@@ -1,4 +1,4 @@
-"""API-level tests for the evidence-grounded AI copilot (Phase 9).
+"""API-level tests for the evidence-grounded AI copilot.
 
 Real HTTP calls against the real (test) database, mirroring every other
 tests/test_api_*.py file's conventions. No ANTHROPIC_API_KEY is set
@@ -59,7 +59,7 @@ def test_copilot_status_requires_authentication(client):
 
 
 def test_suggested_questions_requires_authentication(client):
-    """Phase 16 fix: this endpoint previously had no auth dependency at
+    """Fix: this endpoint previously had no auth dependency at
     all — a real, confirmed gap against this module's own docstring claim
     that every route here requires authentication. Regression test for
     that fix."""
@@ -242,7 +242,7 @@ def test_clean_grounded_answer_from_configured_provider_is_not_flagged(client, a
 
 
 # ---------------------------------------------------------------------------
-# Prompt-injection resistance (Phase 15 §10/§G) — a human-authored
+# Prompt-injection resistance (/§G) — a human-authored
 # annotation is fully attacker- or carelessly-controlled text that flows
 # straight into the evidence block (app.copilot.tools.get_investigation_
 # timeline). This proves, on the real retrieval -> real prompt path (not

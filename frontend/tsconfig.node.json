@@ -5,7 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    // Phase 7 fix: a composite project referenced by another project
+    // Fix: a composite project referenced by another project
     // (tsconfig.json references this one, for `tsc -b`'s cross-project
     // build) cannot set `noEmit: true` — TS rejects that combination
     // outright (a referenced project must be able to emit so the

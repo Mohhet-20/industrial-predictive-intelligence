@@ -1,12 +1,12 @@
 # Time-Series Intelligence — What This Layer Does and Doesn't Do
 
-Status: **Phase 2 — Time-Series Intelligence Foundation.** This describes
+This describes
 what is actually implemented and tested today. It is explicitly NOT the
 anomaly-detection system — see "What this is not" at the bottom.
 
 ## 0. What this builds on
 
-Everything here reads from `sensor_measurements` (Phase 1's immutable raw
+Everything here reads from `sensor_measurements` (the immutable raw
 data) through `app/timeseries/data_access.py`, the one module in this layer
 that talks to the database. Every other `app/timeseries/*` module takes and
 returns plain `pandas.Series`/dicts and has no SQLAlchemy dependency —
@@ -143,7 +143,7 @@ evaluation lets a model see interpolated neighbors of its own test points
 during training, silently inflating every downstream metric — if a future
 phase wants that for a specific, justified methodology, it should ask for
 it explicitly rather than getting it by default here. These utilities are
-foundation-only: nothing in this phase trains a model with them yet.
+foundation-only: nothing trains a model with them yet.
 
 ## 7. Multi-sensor temporal context — association, never causation
 
@@ -172,12 +172,12 @@ strength.
 **These are candidates for human review, not confirmed anomalies and not
 fault diagnoses.** A rigorous, validated anomaly-detection layer — with
 proper evaluation against known-good/known-bad periods — is explicitly
-planned for a later phase, not this one. The API, response shape, and
+planned for later work, not this one. The API, response shape, and
 frontend copy all say "candidate," never "anomaly" or "risk level."
 
 ## 9. API surface (`/api/v1/timeseries/*`)
 
-All bounded (every service call inherits Phase 1's `MAX_ROWS`/
+All bounded (every service call inherits the `MAX_ROWS`/
 `MAX_BUCKETS` guards and raises `422 validation_failed` rather than
 truncating silently), all organization-scoped (every sensor lookup joins
 through `Asset.organization_id`), all behind the same bearer-token auth as
@@ -206,6 +206,6 @@ the rest of the API.
   association only (§7), repeated in every response, not just this doc.
 - **Not fully-featured ML tooling.** The feature framework, dataset
   builder, and splitting utilities are a reusable *foundation* — no model
-  is trained anywhere in this phase's code.
+  is trained anywhere's code.
 - **Domain features are not implemented** (§4) — no invented "health
   score" or "duty cycle" masquerading as a validated engineering metric.

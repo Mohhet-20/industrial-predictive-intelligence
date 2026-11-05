@@ -1,8 +1,8 @@
-"""Intelligence orchestration domain tables (Phase 6).
+"""Intelligence orchestration domain tables.
 
 WHAT THIS MODULE DOES NOT DO: it does not re-implement anomaly detection,
 degradation classification, forecasting, or MLOps governance. Every real
-signal still lives exactly where Phases 3-5 put it
+signal still lives exactly where put it
 (app.models.intelligence, app.models.condition, app.models.mlops) and
 nothing here ever mutates those rows. This module adds a human-oriented
 ORGANIZATIONAL layer on top of that real evidence:
@@ -72,7 +72,7 @@ class InvestigationEvidenceType(str, enum.Enum):
     SHIFT_ANALYSIS_RUN = "shift_analysis_run"     # app.models.mlops.ShiftAnalysisRun
     SENSOR = "sensor"                             # app.models.sensor.Sensor — "this sensor is relevant context"
     CHANGE_CANDIDATE = "change_candidate"         # snapshot-only — no stable id exists anywhere in this schema
-    SCENARIO_RESULT = "scenario_result"           # app.models.scenario.ScenarioRun (Phase 11) — a HYPOTHETICAL, never observed evidence
+    SCENARIO_RESULT = "scenario_result"           # app.models.scenario.ScenarioRun — a HYPOTHETICAL, never observed evidence
 
 
 class InvestigationAnnotationType(str, enum.Enum):
@@ -205,7 +205,7 @@ class InvestigationAnnotation(Base):
 
 class InvestigationRelation(Base):
     """A human-asserted link between two investigations judged related
-    (spec §1: "Related investigations where appropriate"). Directional in
+    ("Related investigations where appropriate"). Directional in
     storage (investigation_id -> related_investigation_id) but intended to
     be read symmetrically by the API — see
     app.services.investigation_service.list_related_investigations."""

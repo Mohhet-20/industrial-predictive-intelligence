@@ -87,7 +87,7 @@ function RunKindBadge({ kind }: { kind: ScenarioRunKind }) {
 }
 
 /** Every rendered scenario result is wrapped in this — a loud, unmissable
- * violet banner so it can never read like a real observation (§13). */
+ * violet banner so it can never read like a real observation. */
 function SimulatedBanner({ children }: { children?: ReactNode }) {
   return (
     <div className="rounded-lg border-2 border-dashed border-violet-300 bg-violet-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-violet-800">

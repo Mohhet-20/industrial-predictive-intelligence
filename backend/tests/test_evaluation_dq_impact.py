@@ -1,4 +1,4 @@
-"""Tests for app.evaluation.dq_impact (Phase 10 §6/§15).
+"""Tests for app.evaluation.dq_impact.
 
 Covers both halves of the data-quality impact analysis: the pure,
 DB-free scenario comparisons in app.evaluation.dq_impact itself, and one

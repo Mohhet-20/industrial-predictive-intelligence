@@ -1,12 +1,12 @@
-"""Scenario simulation / what-if orchestration (Phase 11 §7, §11, §12,
-§16, §17, §18). Resolves organization/sensor scope, loads bounded REAL
+"""Scenario simulation what-if orchestration (
+). Resolves organization/sensor scope, loads bounded REAL
 data, delegates every perturbation/pipeline/comparison computation to the
 DB-agnostic app.simulation.* modules, and persists results. Mirrors
 app.services.condition_service and app.services.anomaly_service's
 structure and conventions throughout — including the sync/async split
 below, copied from app.services.anomaly_service.create_detection_run.
 
-SECURITY / NON-DESTRUCTIVE GUARANTEE (§18): nothing in this module ever
+SECURITY NON-DESTRUCTIVE GUARANTEE: nothing in this module ever
 writes to app.models.measurement.SensorMeasurement. Every read of real data
 goes through app.timeseries.data_access (bounded, organization-scoped,
 read-only); every perturbation is applied to an in-memory copy
@@ -41,7 +41,7 @@ from app.timeseries.data_access import TooManyObservationsError, load_measuremen
 DEFAULT_EXPECTED_INTERVAL_SECONDS = 300.0
 DEFAULT_SEASONAL_PERIOD_SECONDS = 86400.0
 MAX_SCENARIO_ROWS_SYNC = 3000  # mirrors app.services.anomaly_service.MAX_DETECTION_ROWS_SYNC
-MAX_SENSITIVITY_SWEEP_POINTS = 8  # bounded compute (§17) — each point re-runs the full pipeline
+MAX_SENSITIVITY_SWEEP_POINTS = 8  # bounded compute — each point re-runs the full pipeline
 
 
 def _ensure_utc(dt: Optional[datetime]) -> Optional[datetime]:
@@ -71,7 +71,7 @@ def _recent_anomalies_as_dicts(db: Session, *, organization_id: str, sensor_id: 
 
 
 # ---------------------------------------------------------------------------
-# Scenario CRUD (§2, §12)
+# Scenario CRUD
 # ---------------------------------------------------------------------------
 
 
@@ -145,7 +145,7 @@ def list_scenarios(
 
 
 def archive_scenario(db: Session, *, organization_id: str, scenario_id: str) -> Scenario:
-    """§12: 'delete' archives, it never hard-deletes — every prior
+    """: 'delete' archives, it never hard-deletes — every prior
     ScenarioRun and its results stay fully inspectable."""
     scenario = get_scenario(db, organization_id=organization_id, scenario_id=scenario_id)
     scenario.status = ScenarioStatus.ARCHIVED
@@ -155,7 +155,7 @@ def archive_scenario(db: Session, *, organization_id: str, scenario_id: str) -> 
 
 
 # ---------------------------------------------------------------------------
-# Validation (§3) — must pass before a scenario can be run
+# Validation — must pass before a scenario can be run
 # ---------------------------------------------------------------------------
 
 
@@ -212,7 +212,7 @@ def validate_scenario(db: Session, *, organization_id: str, scenario_id: str) ->
 
 
 # ---------------------------------------------------------------------------
-# Model compatibility (§16) — never force an incompatible model; record why
+# Model compatibility — never force an incompatible model; record why
 # ---------------------------------------------------------------------------
 
 
@@ -246,7 +246,7 @@ def _auto_reference_window(baseline_start: datetime, baseline_end: datetime) -> 
 
 
 # ---------------------------------------------------------------------------
-# Pipeline execution for ONE sensor (§4, §5, §6, §11, §16) — shared by
+# Pipeline execution for ONE sensor — shared by
 # single-sensor scenarios and each sensor in a MULTI_SENSOR scenario.
 # ---------------------------------------------------------------------------
 
@@ -352,7 +352,7 @@ def _estimate_scenario_rows(scenario: Scenario) -> int:
 
 
 # ---------------------------------------------------------------------------
-# Run creation & execution (§7, §17)
+# Run creation & execution
 # ---------------------------------------------------------------------------
 
 
@@ -485,7 +485,7 @@ def list_scenario_runs(db: Session, *, organization_id: str, scenario_id: Option
 
 
 # ---------------------------------------------------------------------------
-# Multi-run / multi-scenario comparison (§8) — packages real per-run
+# Multi-run multi-scenario comparison — packages real per-run
 # summaries side by side. No combined score is ever computed.
 # ---------------------------------------------------------------------------
 
@@ -494,7 +494,7 @@ def compare_scenario_runs(db: Session, *, organization_id: str, run_ids: list[st
     if len(run_ids) < 2:
         raise ValidationFailedError("compare requires at least 2 scenario_run_ids.")
     if len(run_ids) > 10:
-        raise ValidationFailedError("compare supports at most 10 scenario_run_ids at once (§17 bounded compute).")
+        raise ValidationFailedError("compare supports at most 10 scenario_run_ids at once (bounded compute).")
 
     runs = []
     for run_id in run_ids:
@@ -519,7 +519,7 @@ def compare_scenario_runs(db: Session, *, organization_id: str, run_ids: list[st
 
 
 # ---------------------------------------------------------------------------
-# Sensitivity analysis (§9) — a magnitude sweep, single-sensor scenarios only
+# Sensitivity analysis — a magnitude sweep, single-sensor scenarios only
 # ---------------------------------------------------------------------------
 
 
@@ -532,7 +532,7 @@ def run_sensitivity_sweep(db: Session, *, organization_id: str, user_id: Optiona
     if not magnitudes:
         raise ValidationFailedError("magnitudes must be a non-empty list.")
     if len(magnitudes) > MAX_SENSITIVITY_SWEEP_POINTS:
-        raise ValidationFailedError(f"A sensitivity sweep supports at most {MAX_SENSITIVITY_SWEEP_POINTS} magnitude points per run (§17 bounded compute).")
+        raise ValidationFailedError(f"A sensitivity sweep supports at most {MAX_SENSITIVITY_SWEEP_POINTS} magnitude points per run (bounded compute).")
 
     run = ScenarioRun(
         organization_id=organization_id, scenario_id=scenario.id, scenario_version=scenario.version,

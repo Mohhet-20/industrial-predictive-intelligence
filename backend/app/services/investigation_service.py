@@ -1,4 +1,4 @@
-"""Investigation workflow service (Phase 6, spec §1/§6/§9).
+"""Investigation workflow service.
 
 This is a HUMAN-ORIENTED ORGANIZATIONAL layer. It never writes to, nor
 reads for the purpose of overwriting, any of the real evidence tables it
@@ -63,7 +63,7 @@ _EVIDENCE_MODELS: dict[InvestigationEvidenceType, type] = {
     InvestigationEvidenceType.GOVERNANCE_EVENT: GovernanceEvent,
     InvestigationEvidenceType.SHIFT_ANALYSIS_RUN: ShiftAnalysisRun,
     InvestigationEvidenceType.SENSOR: Sensor,
-    # A ScenarioRun IS a durable, id-addressable row (Phase 11) — linked by
+    # A ScenarioRun IS a durable, id-addressable row — linked by
     # reference like every other kind above, never snapshotted. Its
     # organization_id is real; it has no sensor_id column of its own (a
     # MULTI_SENSOR run touches several sensors — see its `results.per_sensor`
@@ -171,7 +171,7 @@ def list_status_history(db: Session, *, organization_id: str, investigation_id: 
 
 
 # ---------------------------------------------------------------------------
-# Evidence graph (spec §2)
+# Evidence graph
 # ---------------------------------------------------------------------------
 
 
@@ -258,7 +258,7 @@ def remove_evidence(db: Session, *, organization_id: str, investigation_id: str,
 
 
 # ---------------------------------------------------------------------------
-# Human-in-the-loop knowledge capture (spec §9)
+# Human-in-the-loop knowledge capture
 # ---------------------------------------------------------------------------
 
 
@@ -293,7 +293,7 @@ def list_annotations(db: Session, *, organization_id: str, investigation_id: str
 
 
 # ---------------------------------------------------------------------------
-# Related investigations (spec §1)
+# Related investigations
 # ---------------------------------------------------------------------------
 
 
@@ -324,7 +324,7 @@ def list_related_investigations(db: Session, *, organization_id: str, investigat
     — normalized so that, from the caller's point of view, `investigation_id`
     is always THIS investigation and `related_investigation_id` is always
     the OTHER one, regardless of which direction it was originally stored
-    in. (A bug caught in this phase's self-review: returning the raw rows
+    in. (A bug caught in code review: returning the raw rows
     for a "backward" relation would show investigation_id/related_
     investigation_id swapped relative to what was actually asked for —
     correct in the database, misleading to a client rendering "related

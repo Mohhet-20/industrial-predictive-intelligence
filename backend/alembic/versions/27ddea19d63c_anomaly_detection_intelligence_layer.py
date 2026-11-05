@@ -7,7 +7,7 @@ Create Date: 2026-08-29 21:55:49.429778
 All four intelligence tables affected here (model_versions, model_runs,
 anomalies, anomaly_investigations) — and predictions, which has a foreign
 key into model_runs — were still empty in every environment this schema
-has run in (Phase 3 is the first phase that actually writes rows into
+has run in (this is the first layer that actually writes rows into
 them), so this migration drops and recreates them from scratch rather than
 using SQLite's batch-alter machinery, which cannot cleanly rename/re-target
 unnamed foreign key constraints. If this is ever run against a database
@@ -34,7 +34,7 @@ def _assert_empty(conn) -> None:
         if count:
             raise RuntimeError(
                 f"Migration 27ddea19d63c drops and recreates '{table}', but it has {count} row(s). "
-                "This migration was written assuming these Phase-1/2-era intelligence tables were "
+                "This migration was written assuming these original intelligence tables were "
                 "still unused; back up the database and adapt this migration to an in-place ALTER "
                 "path (or a data-preserving copy) before running it against non-empty data."
             )

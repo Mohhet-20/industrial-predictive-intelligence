@@ -1,4 +1,4 @@
-"""Unit tests for app.simulation.validation (Phase 11 §3, §19) — pure,
+"""Unit tests for app.simulation.validation — pure,
 DB-independent checks. Confirms scenarios are REJECTED (never silently
 clamped) for: insufficient baseline data, unit mismatch, out-of-bounds
 magnitude, a modification window outside/exceeding the baseline window,
@@ -64,7 +64,7 @@ class TestSingleSensorValidation:
         assert result.ok
 
     def test_never_silently_clamps_it_rejects_with_an_explicit_message(self):
-        """§3: 'reject unsafe scenarios, never silently clamp without
+        """: 'reject unsafe scenarios, never silently clamp without
         explanation' — the out-of-bounds magnitude passed through
         unmodified in the error, it was never reduced to fit."""
         huge_magnitude = 10_000.0

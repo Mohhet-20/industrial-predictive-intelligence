@@ -1,7 +1,7 @@
-"""Adversarial & failure-case consolidated testing (Phase 10 §10).
+"""Adversarial & failure-case consolidated testing.
 
-The spec names nine deliberate difficult scenarios. Several are already
-covered, with real passing checks, by other Phase 10 evaluation modules —
+The design names nine deliberate difficult scenarios. Several are already
+covered, with real passing checks, by other evaluation modules —
 this module does not duplicate them, it REFERENCES them so one place
 answers "were all nine covered":
 
@@ -27,7 +27,7 @@ The remaining five are genuinely new checks implemented here:
   - disagreeing detectors (two detector types on the same sensor need not
     agree, and disagreement is not force-reconciled into a false consensus)
 
-Every check here verifies the SAME four properties Phase 10 §10 asks for:
+Every check here verifies the SAME four properties asks for:
 no fabricated certainty, provenance preserved, limitations communicated,
 and safe failure (no crash, no silently corrupted state, no evidence
 overwritten).
@@ -98,7 +98,7 @@ def incompatible_model_artifact(client, headers, db_session) -> dict:
     # that could not happen through this platform's own write paths, but
     # could happen from a manual DB fix, a botched migration, or a schema
     # change — this is exactly the "external tamper / schema drift"
-    # scenario Phase 10 §10 asks to test for).
+    # scenario asks to test for).
     mv = db_session.query(ModelVersion).filter(ModelVersion.id == detector["id"]).first()
     mv.baseline_summary = {"method": "median_mad", "median": 50.0}  # missing required fields
     db_session.commit()
@@ -347,7 +347,7 @@ def run_all(client, headers, db_session) -> dict:
         "component": "adversarial_and_failure_cases",
         "evaluability": "FULLY EVALUABLE WITH AVAILABLE DATA",
         "note": (
-            "Covers the 9 named Phase 10 §10 scenarios: 4 are new checks below, 1 (synthetic-presented-as-real) "
+            "Covers the 9 named scenarios: 4 are new checks below, 1 (synthetic-presented-as-real) "
             "is covered by app.evaluation.copilot_eval.case_synthetic_labeling, 2 (unsupported failure confirmation) "
             "by app.evaluation.copilot_eval's adversarial/anomaly-vs-failure cases, 1 (insufficient history) by "
             "app.evaluation.robustness's boundary sweeps, and 1 (gap overlapping anomaly) by "

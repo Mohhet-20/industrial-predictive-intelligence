@@ -1,6 +1,6 @@
 """Ingestion validation and persistence.
 
-Design goals from the spec, made concrete here:
+Design goals from the design, made concrete here:
   - never silently corrupt data — every rejected record carries a specific
     reason, returned to the caller and stored on the IngestionBatch.
   - a malformed record never takes its well-formed siblings down with it —
