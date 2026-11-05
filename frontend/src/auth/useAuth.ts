@@ -8,6 +8,8 @@ export interface AuthContextValue {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
+  /** Public demo only: a guest session (an engineer account), no password involved. */
+  exploreDemo: () => Promise<void>;
   logout: () => void;
 }
 

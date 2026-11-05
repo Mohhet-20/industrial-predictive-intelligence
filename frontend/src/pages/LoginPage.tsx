@@ -3,9 +3,12 @@ import { Navigate } from "react-router-dom";
 
 import { useAuth } from "@/auth/useAuth";
 
+/** Hosted demo: offer a guest session (POST /auth/guest) on the sign-in page. Set VITE_GUEST_ACCESS=true at build. */
+const GUEST_ACCESS = import.meta.env.VITE_GUEST_ACCESS === "true";
+
 export function LoginPage() {
-  const { token, login, error } = useAuth();
-  const [email, setEmail] = useState("admin@riverbend-demo.io");
+  const { token, login, exploreDemo, error } = useAuth();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -18,6 +21,17 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       await login(email, password);
+    } catch {
+      // error is surfaced via auth context
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleExplore() {
+    setSubmitting(true);
+    try {
+      await exploreDemo();
     } catch {
       // error is surfaced via auth context
     } finally {
@@ -70,9 +84,23 @@ export function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-xs text-slate-400">
-          Demo credentials (after loading the synthetic dataset): admin@riverbend-demo.io / ChangeMe123!
-        </p>
+        {GUEST_ACCESS && (
+          <section aria-label="Live demo" className="mt-6 border-t border-slate-200 pt-5">
+            <p className="text-sm font-medium text-slate-900">New here?</p>
+            <p className="mt-1 text-xs text-slate-500">
+              Explore a synthetic plant as a guest engineer: sensor data, anomaly detection, investigations and
+              scenarios. The demo resets on restart.
+            </p>
+            <button
+              type="button"
+              onClick={handleExplore}
+              disabled={submitting}
+              className="mt-3 w-full rounded-md border border-brand-600 px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-50 disabled:opacity-60"
+            >
+              Explore the live demo
+            </button>
+          </section>
+        )}
       </div>
     </div>
   );

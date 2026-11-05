@@ -51,6 +51,10 @@ class Settings(BaseSettings):
     # Basic anti-brute-force on /auth/login (Phase 7, §10). Explicitly
     # scoped: in-memory, per-process, resets on restart — not a distributed
     # rate limiter. Documented as such rather than oversold.
+    # Public demo: POST /auth/guest signs a visitor in as this one non-admin account, no password. Off by default.
+    guest_access_enabled: bool = False
+    guest_email: str = "guest@riverbend-demo.io"
+
     login_rate_limit_attempts: int = 5
     login_rate_limit_window_seconds: int = 60
 

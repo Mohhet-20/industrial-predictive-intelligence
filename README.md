@@ -201,10 +201,24 @@ cp .env.example .env
 npm run dev
 ```
 
-Open http://localhost:5173 and log in with `admin@riverbend-demo.io` /
-`ChangeMe123!` (change or remove this account before running anywhere but
-a laptop). Full instructions, troubleshooting, and the optional
-Docker/Compose path: [SETUP.md](./SETUP.md).
+Open http://localhost:5173 and sign in with the local demo account the seed
+script creates (see [SETUP.md](./SETUP.md); local development only). Full
+instructions, troubleshooting, and the optional Docker/Compose path are there too.
+
+### Hosted demo
+
+The API runs on Render ([`render.yaml`](./render.yaml), image
+[`deploy/demo/Dockerfile`](./deploy/demo/Dockerfile)) and the website on Vercel
+([`frontend/vercel.json`](./frontend/vercel.json)), which proxies `/api/*` to it.
+The image builds the showcase database once (synthetic data, a trained
+detector and its anomaly, an investigation, a scenario run);
+[`scripts/demo_start.py`](./scripts/demo_start.py) copies it fresh on every
+start, gives every seeded account a random password, and creates:
+
+- the guest engineer behind **Explore the live demo** (`POST /auth/guest`, no
+  password; off unless `GUEST_ACCESS_ENABLED` is set, and it refuses admin accounts);
+- the owner's administrator from `PRED_ADMIN_EMAIL` / `PRED_ADMIN_PASSWORD`
+  (hosting secrets).
 
 ## Demo / sample data
 

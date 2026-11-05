@@ -1,0 +1,18 @@
+# Render blueprint for the public demo API (synthetic data). New > Blueprint > pick this repository.
+# The website is the frontend on Vercel (frontend/vercel.json), which proxies /api/* here.
+services:
+  - type: web
+    name: riverbend-predictive-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/demo/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      # Your private administrator account (normal sign-in form). Set both in the dashboard; never commit them.
+      - key: PRED_ADMIN_EMAIL
+        sync: false
+      - key: PRED_ADMIN_PASSWORD
+        sync: false

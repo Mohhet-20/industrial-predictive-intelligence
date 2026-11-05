@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.core import rate_limit
 from app.core.deps import get_current_user
-from app.core.errors import RateLimitedError
+from app.core.errors import NotFoundError, RateLimitedError
 from app.db.session import get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.auth import LoginRequest, RegisterOrganizationRequest, TokenResponse, UserResponse
 from app.services import auth_service
 
@@ -60,6 +60,34 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
     return TokenResponse(
         access_token=token, expires_in_minutes=settings.jwt_access_token_expire_minutes
     )
+
+
+@router.post("/guest", response_model=TokenResponse)
+def guest(request: Request, db: Session = Depends(get_db)) -> TokenResponse:
+    """Public demo only: a session for the configured guest account (an engineer: ingests data, runs detectors,
+    reviews; cannot administer) with no password involved. 404 unless GUEST_ACCESS_ENABLED is set; refuses an
+    administrator account outright."""
+    from app.core.config import get_settings
+
+    settings = get_settings()
+    if not settings.guest_access_enabled:
+        raise NotFoundError("Guest access is not available on this deployment.")
+    client_ip = request.client.host if request.client else "unknown"
+    allowed, retry_after = rate_limit.check_and_record(
+        f"{client_ip}:guest",
+        max_attempts=settings.login_rate_limit_attempts * 4,
+        window_seconds=settings.login_rate_limit_window_seconds,
+    )
+    if not allowed:
+        raise RateLimitedError(
+            f"Too many requests. Try again in {retry_after} seconds.",
+            details={"retry_after_seconds": retry_after},
+        )
+    user = db.query(User).filter(User.email == settings.guest_email.lower(), User.is_active.is_(True)).first()
+    if user is None or user.role == UserRole.ADMIN:
+        raise NotFoundError("Guest access is not available on this deployment.")
+    token = auth_service.issue_token(user)
+    return TokenResponse(access_token=token, expires_in_minutes=settings.jwt_access_token_expire_minutes)
 
 
 @router.get("/me", response_model=UserResponse)

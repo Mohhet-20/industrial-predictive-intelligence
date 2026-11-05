@@ -48,10 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const startSession = useCallback(async (path: string, body?: unknown) => {
     setError(null);
     try {
-      const tokenResponse = await api.post<TokenResponse>("/auth/login", { email, password });
+      const tokenResponse = await api.post<TokenResponse>(path, body);
       localStorage.setItem(STORAGE_KEY, tokenResponse.access_token);
       setAuthToken(tokenResponse.access_token);
       setToken(tokenResponse.access_token);
@@ -67,6 +67,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const login = useCallback(
+    (email: string, password: string) => startSession("/auth/login", { email, password }),
+    [startSession]
+  );
+  const exploreDemo = useCallback(() => startSession("/auth/guest"), [startSession]);
+
   const logout = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     setAuthToken(null);
@@ -75,8 +81,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, token, isLoading, error, login, logout }),
-    [user, token, isLoading, error, login, logout]
+    () => ({ user, token, isLoading, error, login, exploreDemo, logout }),
+    [user, token, isLoading, error, login, exploreDemo, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
